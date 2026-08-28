@@ -6,8 +6,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class BloodDonationSystemApplication {
 
-    public static void main(String[] args) {
+    static void main(String[] args) {
         SpringApplication.run(BloodDonationSystemApplication.class, args);
+        System.out.println("\u001B[1;96m" + "--And we're live!--" + "\u001B[0;37m");
     }
 
 }
