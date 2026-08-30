@@ -1,5 +1,6 @@
 package com.b7g2_08.blooddonationsystem.Models;
 
+import com.b7g2_08.blooddonationsystem.Abstracts.User;
 import com.b7g2_08.blooddonationsystem.Enums.userType;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
@@ -27,18 +28,11 @@ public class AuthEntity implements UserDetails {
     @JsonIgnore
     private String encryptedPW;
 
-    @Column(nullable = false)
-    private String phone;
-
     @Enumerated(EnumType.STRING)
     private userType userType;
 
-
-//    @OneToOne(mappedBy = "authEntity")
-//    private Student student;
-//
-//    @OneToOne(mappedBy = "authEntity")
-//    private Instructor instructor;
+    @OneToOne(mappedBy = "authEntity")
+    private User user;
 
     @Override
     public boolean isAccountNonExpired() { return true; }
@@ -67,14 +61,6 @@ public class AuthEntity implements UserDetails {
 
     public void setUsername(String username) {
         this.username = username;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
     }
 
     public userType getUserType() {
