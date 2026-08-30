@@ -1,4 +1,4 @@
-package com.b7g2_08.blooddonationsystem.Models;
+package com.b7g2_08.blooddonationsystem.Models.Users;
 
 import com.b7g2_08.blooddonationsystem.Abstracts.User;
 import com.b7g2_08.blooddonationsystem.Enums.adminType;
