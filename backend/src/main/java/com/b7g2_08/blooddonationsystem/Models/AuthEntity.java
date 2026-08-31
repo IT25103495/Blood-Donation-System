@@ -1,7 +1,10 @@
 package com.b7g2_08.blooddonationsystem.Models;
 
-import com.b7g2_08.blooddonationsystem.Abstracts.User;
 import com.b7g2_08.blooddonationsystem.Enums.userType;
+import com.b7g2_08.blooddonationsystem.Models.Users.Admin;
+import com.b7g2_08.blooddonationsystem.Models.Users.Donor;
+import com.b7g2_08.blooddonationsystem.Models.Users.Hospital;
+import com.b7g2_08.blooddonationsystem.Models.Users.Hoster;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -32,7 +35,13 @@ public class AuthEntity implements UserDetails {
     private userType userType;
 
     @OneToOne(mappedBy = "authEntity")
-    private User user;
+    private Admin admin;
+    @OneToOne(mappedBy = "authEntity")
+    private Donor donor;
+    @OneToOne(mappedBy = "authEntity")
+    private Hospital hospital;
+    @OneToOne(mappedBy = "authEntity")
+    private Hoster hoster;
 
     @Override
     public boolean isAccountNonExpired() { return true; }
@@ -76,19 +85,35 @@ public class AuthEntity implements UserDetails {
         return List.of(new SimpleGrantedAuthority("ROLE_" + getUserType().name()));
     }
 
-//    public Student getStudent() {
-//        return student;
-//    }
-//
-//    public void setStudent(Student student) {
-//        this.student = student;
-//    }
-//
-//    public Instructor getInstructor() {
-//        return instructor;
-//    }
-//
-//    public void setInstructor(Instructor instructor) {
-//        this.instructor = instructor;
-//    }
+    public Admin getAdmin() {
+        return admin;
+    }
+
+    public void setAdmin(Admin admin) {
+        this.admin = admin;
+    }
+
+    public Donor getDonor() {
+        return donor;
+    }
+
+    public void setDonor(Donor donor) {
+        this.donor = donor;
+    }
+
+    public Hospital getHospital() {
+        return hospital;
+    }
+
+    public void setHospital(Hospital hospital) {
+        this.hospital = hospital;
+    }
+
+    public Hoster getHoster() {
+        return hoster;
+    }
+
+    public void setHoster(Hoster hoster) {
+        this.hoster = hoster;
+    }
 }

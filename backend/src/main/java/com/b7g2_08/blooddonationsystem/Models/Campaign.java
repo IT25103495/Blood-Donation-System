@@ -28,7 +28,7 @@ public class Campaign {
     private campStatus status;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ID", nullable = false)
+    @JoinColumn(name = "Host ID", nullable = false)
     private Hoster hoster;
 
     @ManyToMany(fetch = FetchType.LAZY)

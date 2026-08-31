@@ -18,7 +18,7 @@ public class Venue {
     @Column(name = "Address")
     private String address;
 
-    @ManyToMany(mappedBy = "Campaign_Venues")
+    @ManyToMany(mappedBy = "venueSet")
     Set<Campaign> campaignSet;
 
     @ManyToOne(fetch = FetchType.LAZY)

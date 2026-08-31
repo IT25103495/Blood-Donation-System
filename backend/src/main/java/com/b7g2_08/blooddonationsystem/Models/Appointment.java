@@ -21,7 +21,7 @@ public class Appointment {
     private appStatus status;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ID", nullable = false)
+    @JoinColumn(name = "Donor ID", nullable = false)
     private Donor donor;
 
     @ManyToOne(fetch = FetchType.LAZY)

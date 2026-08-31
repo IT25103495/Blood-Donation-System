@@ -28,7 +28,7 @@ public class Request {
     private reqStatus status;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ID", nullable = false)
+    @JoinColumn(name = "Hospital ID", nullable = false)
     private Hospital hospital;
 
     public Integer getReqID() {
