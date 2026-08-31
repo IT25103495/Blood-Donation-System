@@ -9,11 +9,11 @@ import jakarta.persistence.Entity;
 @Entity
 public class Hospital extends User {
 
-    @Column(name = "Address")
-    protected String address;
-
     @Column(name = "Hospital Name")
-    protected String hospitalName;
+    private String hospitalName;
+
+    @Column(name = "Address")
+    private String address;
 
     public String getAddress() {
         return address;

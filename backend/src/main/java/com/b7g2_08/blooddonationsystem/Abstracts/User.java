@@ -22,7 +22,8 @@ public abstract class User {
 
     @JsonIgnore
     @OneToOne
-    @JoinColumn(name = "authId", nullable = false)
+    @JoinColumn(name = "id", nullable = false)
+    //FIXME: Used to be name = "authId", fix if broken
     private AuthEntity authEntity;
 
     public Integer getID() {

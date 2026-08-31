@@ -11,7 +11,7 @@ import jakarta.persistence.Entity;
 public class Admin extends User {
 
     @Column(name = "Admin Type")
-    protected adminType type;
+    private adminType type;
 
     public adminType getType() {
         return type;

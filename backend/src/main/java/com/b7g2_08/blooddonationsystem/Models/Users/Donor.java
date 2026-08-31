@@ -10,21 +10,20 @@ import java.time.LocalDate;
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Entity
 public class Donor extends User {
-
     @Column(name = "First Name")
-    protected String f_Name;
+    private String f_Name;
 
     @Column(name = "Last Name")
-    protected String l_Name;
-
-    @Column(name = "Blood Type")
-    protected String bloodType;
-
-    @Column(name = "Date of Birth")
-    protected LocalDate dob;
+    private String l_Name;
 
     @Column(name = "NIC")
-    protected String NIC;
+    private String NIC;
+
+    @Column(name = "Blood Type")
+    private String bloodType;
+
+    @Column(name = "Date of Birth")
+    private LocalDate dob;
 
     public String getF_Name() {
         return f_Name;

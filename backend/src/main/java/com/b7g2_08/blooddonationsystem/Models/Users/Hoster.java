@@ -10,7 +10,7 @@ import jakarta.persistence.Entity;
 public class Hoster extends User {
 
     @Column(name = "Organisation")
-    protected String orgName;
+    private String orgName;
 
     public String getOrgName() {
         return orgName;

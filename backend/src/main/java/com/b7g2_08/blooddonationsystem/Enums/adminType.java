@@ -2,6 +2,6 @@ package com.b7g2_08.blooddonationsystem.Enums;
 
 public enum adminType {
     DOCTOR,
-    BANK,
+    MANAGER, //Bank Manager, FYI
     SYSADMIN
 }
