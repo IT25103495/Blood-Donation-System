@@ -76,6 +76,7 @@ public class AuthService {
         AuthEntity auth = new AuthEntity();
 
         user.setPhoneNum(_user.getPhoneNum());
+        user.setType(_user.getType());
         user.setAuthEntity(auth);
 
         auth.setUsername(_user.getUsername());

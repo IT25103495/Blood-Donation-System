@@ -1,5 +1,7 @@
 package com.b7g2_08.blooddonationsystem.DTOs.Admin;
 
+import com.b7g2_08.blooddonationsystem.Enums.adminType;
+
 import java.time.LocalDate;
 
 public class adminCreateDTO {
@@ -10,6 +12,8 @@ public class adminCreateDTO {
 
     protected String username;
     protected String password;
+
+    private adminType type;
 
     public String getEmail() {
         return email;
@@ -27,7 +31,9 @@ public class adminCreateDTO {
         return password;
     }
 
-
+    public adminType getType() {
+        return type;
+    }
 }
 
 

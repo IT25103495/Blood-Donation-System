@@ -1,5 +1,6 @@
 package com.b7g2_08.blooddonationsystem.DTOs.Admin;
 
+import com.b7g2_08.blooddonationsystem.Enums.adminType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Id;
 
@@ -21,6 +22,9 @@ public class adminUpdateDTO {
     protected String username = "noChange";
     @Schema(defaultValue = "noChange")
     protected String password = "noChange";
+
+    @Schema(defaultValue = "noChange")
+    private adminType type;
 
     public String getEmail() {
         return email;
@@ -54,4 +58,11 @@ public class adminUpdateDTO {
         this.password = password;
     }
 
+    public adminType getType() {
+        return type;
+    }
+
+    public void setType(adminType type) {
+        this.type = type;
+    }
 }
