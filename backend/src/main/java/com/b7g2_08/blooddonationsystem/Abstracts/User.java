@@ -55,9 +55,9 @@ public abstract class User {
 //    public void setDob(LocalDate dob) {
 //        this.dob = dob;
 //    }
-//    public void setPhoneNum(String phoneNum) {
-//        this.phoneNum = phoneNum;
-//    }
+    public void setPhoneNum(String phoneNum) {
+        this.phoneNum = phoneNum;
+    }
     public void setAuthEntity(AuthEntity authEntity) {
         this.authEntity = authEntity;
     }
