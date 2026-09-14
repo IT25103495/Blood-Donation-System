@@ -1,7 +1,9 @@
 package com.b7g2_08.blooddonationsystem.Controllers;
 
+import com.b7g2_08.blooddonationsystem.DTOs.Campaign.campaignCreateDTO;
 import com.b7g2_08.blooddonationsystem.Models.Campaign;
 import com.b7g2_08.blooddonationsystem.Repos.CampaignRepository;
+import com.b7g2_08.blooddonationsystem.Services.CampaignService;
 import com.b7g2_08.blooddonationsystem.Services.InventoryService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,12 +19,12 @@ public class CampaignController {
     @Autowired
     private CampaignRepository campaignRepository;
     @Autowired
-    private InventoryService inventoryService;
+    private CampaignService campaignService;
 
     @PostMapping("/add")
-    public @ResponseBody String addNewCampaign(@RequestBody Campaign campaign) {
-
-
-        return "Success";
+    public @ResponseBody String addNewCampaign(@RequestBody campaignCreateDTO campaign) {
+        return campaignService.addNewCampaign(campaign);
     }
+
+
 }
