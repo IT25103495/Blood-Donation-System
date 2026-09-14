@@ -3,11 +3,11 @@ package com.b7g2_08.blooddonationsystem.DTOs.Donor;
 import java.time.LocalDate;
 
 public class donorCreateDTO {
-    private String f_Name;
-    private String l_Name;
-    private String NIC;
-    private String bloodType;
-    private LocalDate dob;
+    protected String f_Name;
+    protected String l_Name;
+    protected String NIC;
+    protected String bloodType;
+    protected LocalDate dob;
 
     protected String email;
     protected String phoneNum;
