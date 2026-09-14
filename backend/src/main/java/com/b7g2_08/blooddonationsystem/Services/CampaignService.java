@@ -48,4 +48,20 @@ public class CampaignService {
         campaignRepository.save(campaign);
         return "Success";
     }
+
+    public @ResponseBody String updateCampaignStatus(Integer campId, campStatus newStatus) {
+        Campaign campaign = campaignRepository.findById(campId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Campaign Not Found"));
+
+        campaign.setStatus(newStatus);
+        campaignRepository.save(campaign);
+        return "Updated";
+    }
+
+    public String deleteCampaign(Integer campID) {
+        Campaign campaign = campaignRepository.findById(campID)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Campaign Not Found"));
+
+        campaignRepository.delete(campaign);
+        return "Deleted";
+    }
 }
