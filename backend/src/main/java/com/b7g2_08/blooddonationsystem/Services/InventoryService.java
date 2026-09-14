@@ -1,6 +1,7 @@
 package com.b7g2_08.blooddonationsystem.Services;
 
 import com.b7g2_08.blooddonationsystem.DTOs.Inventory.inventoryCreateDTO;
+import com.b7g2_08.blooddonationsystem.DTOs.Inventory.inventoryStatusDTO;
 import com.b7g2_08.blooddonationsystem.Enums.itemStatus;
 import com.b7g2_08.blooddonationsystem.Models.Appointment;
 import com.b7g2_08.blooddonationsystem.Models.Bank;
@@ -41,5 +42,23 @@ public class InventoryService {
 
         inventoryRepo.save(item);
         return "Saved";
+    }
+
+    @Transactional
+    public @ResponseBody String updateStatus(inventoryStatusDTO _status) {
+        Inventory item = inventoryRepo.findById(_status.getItemID()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Item Not Found!"));
+        item.setStatus(_status.getStatus());
+
+        inventoryRepo.save(item);
+        return "Updated";
+    }
+
+    @Transactional
+    public @ResponseBody String deleteItem(int ID) {
+        if (inventoryRepo.existsById(ID)) {
+            inventoryRepo.deleteById(ID);
+            return "Deleted";
+        }
+        else return "Not Found";
     }
 }
