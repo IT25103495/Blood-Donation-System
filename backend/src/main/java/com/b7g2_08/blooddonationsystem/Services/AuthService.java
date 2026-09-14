@@ -60,6 +60,7 @@ public class AuthService {
         else {
             token.setToken(jwtUtil.generateToken(opAuth.get().getUsername()));
             token.setSuccess(true);
+            //TODO: Change how this works so the role can be an admin sub-type for more advanced permissions
             token.setRole(opAuth.get().getUserType().name());
         }
 
