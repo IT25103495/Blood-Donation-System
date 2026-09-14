@@ -1,10 +1,12 @@
 package com.b7g2_08.blooddonationsystem.Controllers;
 
 import com.b7g2_08.blooddonationsystem.DTOs.Inventory.inventoryCreateDTO;
+import com.b7g2_08.blooddonationsystem.Models.Inventory;
 import com.b7g2_08.blooddonationsystem.Repos.InventoryRepository;
 import com.b7g2_08.blooddonationsystem.Services.InventoryService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 @SecurityRequirement(name = "bearerAuth")
 @RequestMapping(path="/Inventory")
 public class InventoryController {
-    //FIXME: May end up unused
     @Autowired
     private InventoryRepository inventoryRepo;
     @Autowired
@@ -22,5 +23,17 @@ public class InventoryController {
     @PostMapping(path="/add")
     public @ResponseBody String addNewInventory(@RequestBody inventoryCreateDTO item) {
         return inventoryService.addNewInventory(item);
+    }
+
+    @GetMapping(path="/getAll")
+    public @ResponseBody Iterable<Inventory> getInventory() {
+        return inventoryRepo.findAll();
+    }
+
+    @GetMapping(path="/getById")
+    public @ResponseBody ResponseEntity<Inventory> getItemByID(@RequestParam int ID) {
+        return inventoryRepo.findById(ID)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 }

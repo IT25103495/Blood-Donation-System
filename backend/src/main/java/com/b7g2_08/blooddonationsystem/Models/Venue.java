@@ -1,10 +1,17 @@
 package com.b7g2_08.blooddonationsystem.Models;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 
 import java.util.Set;
 
+@JsonIdentityInfo(
+        generator = ObjectIdGenerators.PropertyGenerator.class,
+        property = "venueID"
+)
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Entity
 public class Venue {
@@ -23,6 +30,7 @@ public class Venue {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "bankID", nullable = false)
+    @JsonIdentityReference(alwaysAsId = true)
     private Bank assignedBank;
 
     public Integer getVenueID() {

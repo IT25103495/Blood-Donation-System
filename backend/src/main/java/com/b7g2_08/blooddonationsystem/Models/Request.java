@@ -2,6 +2,7 @@ package com.b7g2_08.blooddonationsystem.Models;
 
 import com.b7g2_08.blooddonationsystem.Enums.reqStatus;
 import com.b7g2_08.blooddonationsystem.Models.Users.Hospital;
+import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 
@@ -29,6 +30,7 @@ public class Request {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "Hospital ID", nullable = false)
+    @JsonIdentityReference(alwaysAsId = true)
     private Hospital hospital;
 
     public Integer getReqID() {

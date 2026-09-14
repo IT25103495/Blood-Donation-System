@@ -1,11 +1,18 @@
 package com.b7g2_08.blooddonationsystem.Models;
 
 import com.b7g2_08.blooddonationsystem.Enums.itemStatus;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
 
+@JsonIdentityInfo(
+        generator = ObjectIdGenerators.PropertyGenerator.class,
+        property = "itemID"
+)
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Entity
 public class Inventory {
@@ -27,10 +34,13 @@ public class Inventory {
 
     @OneToOne
     @JoinColumn(name = "appID", nullable = false)
+    //FIXME: If I need the appointment object directly, remove this line:
+    @JsonIdentityReference(alwaysAsId = true)
     private Appointment appointment;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "bankID", nullable = false)
+    @JsonIdentityReference(alwaysAsId = true)
     private Bank bank;
 
 

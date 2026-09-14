@@ -2,11 +2,18 @@ package com.b7g2_08.blooddonationsystem.Models;
 
 import com.b7g2_08.blooddonationsystem.Enums.appStatus;
 import com.b7g2_08.blooddonationsystem.Models.Users.Donor;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
 
+@JsonIdentityInfo(
+        generator = ObjectIdGenerators.PropertyGenerator.class,
+        property = "appID"
+)
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Entity
 public class Appointment {
@@ -22,18 +29,22 @@ public class Appointment {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "Donor ID", nullable = false)
+    @JsonIdentityReference(alwaysAsId = true)
     private Donor donor;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name= "campID", nullable = false)
+    @JsonIdentityReference(alwaysAsId = true)
     private Campaign campaign;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "venueID", nullable = false)
+    @JsonIdentityReference(alwaysAsId = true)
     private Venue venue;
 
     //FIXME: If this doesn't work, map by appID
     @OneToOne(mappedBy = "appointment")
+    @JsonIdentityReference(alwaysAsId = true)
     private Inventory item;
 
     public Integer getAppID() {

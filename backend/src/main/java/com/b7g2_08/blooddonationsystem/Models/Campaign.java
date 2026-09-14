@@ -2,12 +2,19 @@ package com.b7g2_08.blooddonationsystem.Models;
 
 import com.b7g2_08.blooddonationsystem.Enums.campStatus;
 import com.b7g2_08.blooddonationsystem.Models.Users.Hoster;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
 import java.util.Set;
 
+@JsonIdentityInfo(
+        generator = ObjectIdGenerators.PropertyGenerator.class,
+        property = "campID"
+)
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Entity
 public class Campaign {
@@ -29,6 +36,7 @@ public class Campaign {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "Host ID", nullable = false)
+    @JsonIdentityReference(alwaysAsId = true)
     private Hoster hoster;
 
     @ManyToMany(fetch = FetchType.LAZY)
