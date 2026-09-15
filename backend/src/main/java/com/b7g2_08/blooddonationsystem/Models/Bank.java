@@ -1,17 +1,11 @@
 package com.b7g2_08.blooddonationsystem.Models;
 
 import com.b7g2_08.blooddonationsystem.Models.Users.Admin;
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.Entity;
 import jakarta.persistence.*;
 
-@JsonIdentityInfo(
-        generator = ObjectIdGenerators.PropertyGenerator.class,
-        property = "bankID"
-)
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Entity
 public class Bank {
