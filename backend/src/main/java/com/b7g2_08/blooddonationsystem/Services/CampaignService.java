@@ -96,7 +96,7 @@ public class CampaignService {
         return "Updated";
     }
 
-    String deleteCampaign(Integer campID) {
+    public String deleteCampaign(Integer campID) {
         Campaign campaign = campaignRepository.findById(campID)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Campaign Not Found"));
 
