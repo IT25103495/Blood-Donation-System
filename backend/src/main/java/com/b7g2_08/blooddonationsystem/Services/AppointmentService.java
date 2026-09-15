@@ -2,6 +2,8 @@ package com.b7g2_08.blooddonationsystem.Services;
 
 import com.b7g2_08.blooddonationsystem.DTOs.Appointment.appointmentCreateDTO;
 import com.b7g2_08.blooddonationsystem.DTOs.Appointment.appointmentResponseDTO;
+import com.b7g2_08.blooddonationsystem.DTOs.Appointment.appointmentStatusUpdateDTO;
+import com.b7g2_08.blooddonationsystem.DTOs.Appointment.appointmentUpdateDTO;
 import com.b7g2_08.blooddonationsystem.Enums.appStatus;
 import com.b7g2_08.blooddonationsystem.Models.Appointment;
 import com.b7g2_08.blooddonationsystem.Models.Campaign;
@@ -70,6 +72,43 @@ public class AppointmentService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Appointment Not Found!"));
 
         return new appointmentResponseDTO(appointment);
+    }
+
+    @Transactional
+    public @ResponseBody String updateAppointment(int id, appointmentUpdateDTO appointmentUpdateDTO) {
+
+        Appointment appointment = appointmentRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Appointment Not Found!"));
+        Campaign campaign = campaignRepository.findById(appointmentUpdateDTO.getCampId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Campaign Not Found!"));
+        Venue venue = venueRepository.findById(appointmentUpdateDTO.getVenueID()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Venue Not Found!"));
+        Donor donor = donorUserRepository.findById(appointmentUpdateDTO.getDonorID()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Donor Not Found!"));
+
+        appointment.setDate(appointmentUpdateDTO.getDate());
+        appointment.setStatus(appointmentUpdateDTO.getStatus());
+        appointment.setCampaign(campaign);
+        appointment.setDonor(donor);
+        appointment.setVenue(venue);
+        appointmentRepository.save(appointment);
+        return "Updated";
+
+    }
+
+    @Transactional
+    public @ResponseBody String updateAppointmentStatus(int id, appointmentStatusUpdateDTO appointmentStatusUpdateDTO) {
+        Appointment appointment = appointmentRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Appointment Not Found!"));
+
+        appointment.setStatus(appointmentStatusUpdateDTO.getStatus());
+        appointmentRepository.save(appointment);
+        return "Status Updated";
+
+    }
+
+    @Transactional
+    public @ResponseBody String deleteAppointment(int id) {
+        Appointment app = appointmentRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Appointment Not Found!"));
+
+        appointmentRepository.delete(app);
+        return "Deleted";
     }
 
 
