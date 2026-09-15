@@ -1,7 +1,8 @@
 package com.b7g2_08.blooddonationsystem.Controllers;
 
+import com.b7g2_08.blooddonationsystem.DTOs.Inventory.inventoryCreateDTO;
 import com.b7g2_08.blooddonationsystem.DTOs.Venue.venueCreateDTO;
-import com.b7g2_08.blooddonationsystem.DTOs.Venue.venueUpdateDTO;
+import com.b7g2_08.blooddonationsystem.Models.Inventory;
 import com.b7g2_08.blooddonationsystem.Models.Venue;
 import com.b7g2_08.blooddonationsystem.Repos.VenueRepository;
 import com.b7g2_08.blooddonationsystem.Services.VenueService;
@@ -24,11 +25,6 @@ public class VenueController {
     @PostMapping(path="/add")
     public @ResponseBody String addNewVenue(@RequestBody venueCreateDTO venue) {
         return venueService.addNewVenue(venue);
-    }
-
-    @PutMapping(path="/update")
-    public @ResponseBody String updateVenue(@RequestBody venueUpdateDTO venue) {
-        return venueService.updateVenue(venue);
     }
 
     @GetMapping(path="/getAll")
