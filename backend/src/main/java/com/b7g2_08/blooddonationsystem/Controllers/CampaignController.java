@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 @Controller
 @CrossOrigin
 @SecurityRequirement(name = "bearerAuth")
-@RequestMapping(path = "/Campaign")
+@RequestMapping(path = "/api/Campaign")
 public class CampaignController {
 
     @Autowired
