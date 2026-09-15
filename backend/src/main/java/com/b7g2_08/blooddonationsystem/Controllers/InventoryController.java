@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 @Controller
 @CrossOrigin
 @SecurityRequirement(name = "bearerAuth")
-@RequestMapping(path="/Inventory")
+@RequestMapping(path="/api/Inventory")
 public class InventoryController {
     @Autowired
     private InventoryRepository inventoryRepo;
