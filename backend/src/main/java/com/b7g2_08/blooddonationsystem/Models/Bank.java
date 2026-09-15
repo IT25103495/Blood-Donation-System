@@ -11,6 +11,9 @@ public class Bank {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer bankID;
 
+    @Column(name = "Name")
+    private String name;
+
     @Column(name = "Address")
     private String address;
 
@@ -20,6 +23,14 @@ public class Bank {
 
     public void setBankID(Integer bankID) {
         this.bankID = bankID;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getAddress() {
