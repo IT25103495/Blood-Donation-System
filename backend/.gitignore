@@ -31,5 +31,6 @@ build/
 
 ### VS Code ###
 .vscode/
+/data/db.mv.db.bak
 /data/db.mv.db
 /data/db.trace.db
