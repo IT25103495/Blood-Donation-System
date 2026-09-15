@@ -1,6 +1,7 @@
 package com.b7g2_08.blooddonationsystem.Controllers;
 
 import com.b7g2_08.blooddonationsystem.DTOs.Campaign.campaignCreateDTO;
+import com.b7g2_08.blooddonationsystem.DTOs.Campaign.campaignUpdateDTO;
 import com.b7g2_08.blooddonationsystem.Enums.campStatus;
 import com.b7g2_08.blooddonationsystem.Models.Campaign;
 import com.b7g2_08.blooddonationsystem.Repos.CampaignRepository;
@@ -16,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 @Controller
 @CrossOrigin
 @SecurityRequirement(name = "bearerAuth")
-@RequestMapping(path = "/api/Campaign")
+@RequestMapping(path = "/api/campaigns")
 public class CampaignController {
 
     @Autowired
@@ -24,38 +25,45 @@ public class CampaignController {
     @Autowired
     private CampaignService campaignService;
 
-    @PostMapping("/add")
+    @PostMapping()
     public @ResponseBody String addNewCampaign(@RequestBody campaignCreateDTO campaign) {
         return campaignService.addNewCampaign(campaign);
     }
 
-    @GetMapping("getAll")
+    @GetMapping()
     public @ResponseBody Iterable<Campaign> getAllCampaigns() {
         return campaignRepository.findAll();
     }
 
-    @GetMapping("/getById")
-    public @ResponseBody ResponseEntity<Campaign> getCampaignById(@RequestParam int id) {
+    @GetMapping("/{id}")
+    public @ResponseBody ResponseEntity<Campaign> getCampaignById(@PathVariable int id) {
         return campaignRepository.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @PutMapping("/updateStatus")
-    public @ResponseBody String updateStatus(@RequestParam int campId, @RequestParam campStatus status) {
-        return campaignService.updateCampaignStatus(campId, status);
+    @PatchMapping("/{id}")
+    public @ResponseBody String updateStatus(@PathVariable int id, @RequestParam campStatus status) {
+        return campaignService.updateCampaignStatus(id, status);
 
     }
 
-    @GetMapping("/getByHoster")
-    public @ResponseBody Iterable<Campaign> getCampaignsByHoster(@RequestParam Integer hosterID) {
+    @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping("/{id}")
+    public @ResponseBody String updateCampaign(@PathVariable int id, @RequestBody campaignUpdateDTO campaignUpdateDTO) {
+        return campaignService.updateCampaign(id, campaignUpdateDTO);
+
+    }
+
+    @GetMapping("/hoster/{hosterID}")
+    public @ResponseBody Iterable<Campaign> getCampaignsByHoster(@PathVariable Integer hosterID) {
         return campaignRepository.findByHoster_ID(hosterID);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @DeleteMapping("/delete")
-    public @ResponseBody String deleteCampaign(@RequestParam Integer campID) {
-        return campaignService.deleteCampaign(campID);
+    @DeleteMapping("/{id}")
+    public @ResponseBody String deleteCampaign(@PathVariable Integer id) {
+        return campaignService.deleteCampaign(id);
     }
 }
