@@ -2,7 +2,7 @@ package com.b7g2_08.blooddonationsystem.Controllers;
 
 import com.b7g2_08.blooddonationsystem.DTOs.Campaign.campaignCreateDTO;
 import com.b7g2_08.blooddonationsystem.DTOs.Campaign.campaignUpdateDTO;
-import com.b7g2_08.blooddonationsystem.Enums.campStatus;
+import com.b7g2_08.blooddonationsystem.DTOs.Campaign.campaignStatusUpdateDTO;
 import com.b7g2_08.blooddonationsystem.Models.Campaign;
 import com.b7g2_08.blooddonationsystem.Repos.CampaignRepository;
 import com.b7g2_08.blooddonationsystem.Services.CampaignService;
@@ -41,9 +41,10 @@ public class CampaignController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    //update campaign status
     @PreAuthorize("hasRole('ADMIN')")
-    @PatchMapping("/{id}")
-    public @ResponseBody String updateStatus(@PathVariable int id, @RequestParam campStatus status) {
+    @PostMapping("/{id}/status")
+    public @ResponseBody String updateStatus(@PathVariable int id, @RequestBody campaignStatusUpdateDTO status) {
         return campaignService.updateCampaignStatus(id, status);
 
     }

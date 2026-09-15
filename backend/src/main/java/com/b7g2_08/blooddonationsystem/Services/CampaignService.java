@@ -2,6 +2,7 @@ package com.b7g2_08.blooddonationsystem.Services;
 
 import com.b7g2_08.blooddonationsystem.DTOs.Campaign.campaignCreateDTO;
 import com.b7g2_08.blooddonationsystem.DTOs.Campaign.campaignUpdateDTO;
+import com.b7g2_08.blooddonationsystem.DTOs.Campaign.campaignStatusUpdateDTO;
 import com.b7g2_08.blooddonationsystem.Enums.campStatus;
 import com.b7g2_08.blooddonationsystem.Models.Campaign;
 import com.b7g2_08.blooddonationsystem.Models.Users.Hoster;
@@ -52,12 +53,26 @@ public class CampaignService {
     }
 
     @Transactional
-    public @ResponseBody String updateCampaignStatus(Integer campId, campStatus newStatus) {
+    public @ResponseBody String updateCampaignStatus(Integer campId, campaignStatusUpdateDTO campaignStatusUpdateDTO) {
         Campaign campaign = campaignRepository.findById(campId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Campaign Not Found"));
 
-        campaign.setStatus(newStatus);
+        campaign.setStatus(campaignStatusUpdateDTO.getStatus());
         campaignRepository.save(campaign);
-        return "Updated";
+        return "Status Updated";
+    }
+
+    @Transactional
+    public @ResponseBody String assignVenue(int campID, int venueID) {
+        Campaign camp = campaignRepository.findById(campID).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Campaign Not Found"));
+        Venue venue = venueRepository.findById(venueID).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Venue Not Found"));
+
+        Set<Venue> set = camp.getVenueSet();
+        set.add(venue);
+        camp.setVenueSet(set);
+
+        campaignRepository.save(camp);
+
+        return "Venue Assigned";
     }
 
     @Transactional
