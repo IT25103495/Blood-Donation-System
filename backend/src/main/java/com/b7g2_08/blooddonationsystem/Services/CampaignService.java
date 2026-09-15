@@ -96,8 +96,7 @@ public class CampaignService {
         return "Updated";
     }
 
-    @Transactional
-    public @ResponseBody String deleteCampaign(Integer campID) {
+    String deleteCampaign(Integer campID) {
         Campaign campaign = campaignRepository.findById(campID)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Campaign Not Found"));
 
