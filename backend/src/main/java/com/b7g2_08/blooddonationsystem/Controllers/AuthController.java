@@ -6,6 +6,7 @@ import com.b7g2_08.blooddonationsystem.DTOs.Auth.authLoginDTO;
 import com.b7g2_08.blooddonationsystem.DTOs.Donor.donorCreateDTO;
 import com.b7g2_08.blooddonationsystem.DTOs.Hospital.hospitalCreateDTO;
 import com.b7g2_08.blooddonationsystem.DTOs.Hoster.hosterCreateDTO;
+import com.b7g2_08.blooddonationsystem.Models.Users.Admin;
 import com.b7g2_08.blooddonationsystem.Services.AuthService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,4 +46,8 @@ public class AuthController {
     public @ResponseBody String register_hoster(@RequestBody hosterCreateDTO user) {
         return authService.register_hoster(user);
     }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping(path = "/get/adminList")
+    public @ResponseBody Iterable<Admin> getAdmins() { return authService.getAdmins();}
 }
