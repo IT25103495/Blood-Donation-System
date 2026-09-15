@@ -5,7 +5,7 @@ import java.time.LocalDate;
 public class donorCreateDTO {
     protected String f_Name;
     protected String l_Name;
-    protected String NIC;
+    protected String nic;
     protected String bloodType;
     protected LocalDate dob;
 
@@ -22,8 +22,8 @@ public class donorCreateDTO {
         return l_Name;
     }
 
-    public String getNIC() {
-        return NIC;
+    public String getNic() {
+        return nic;
     }
 
     public String getBloodType() {

@@ -7,6 +7,7 @@ import com.b7g2_08.blooddonationsystem.DTOs.Auth.authLoginDTO;
 import com.b7g2_08.blooddonationsystem.DTOs.Donor.donorCreateDTO;
 import com.b7g2_08.blooddonationsystem.DTOs.Hospital.hospitalCreateDTO;
 import com.b7g2_08.blooddonationsystem.DTOs.Hoster.hosterCreateDTO;
+import com.b7g2_08.blooddonationsystem.Enums.bloodTypeList;
 import com.b7g2_08.blooddonationsystem.Enums.userType;
 import com.b7g2_08.blooddonationsystem.Models.AuthEntity;
 import com.b7g2_08.blooddonationsystem.Models.Users.Admin;
@@ -47,8 +48,8 @@ public class AuthService {
     @Autowired
     PasswordEncoder encoder;
 
-    private static final String EMAIL_REGEX = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
-    private static final Pattern EMAIL_PATTERN = Pattern.compile(EMAIL_REGEX);
+    private static final Pattern EMAIL_PATTERN = Pattern.compile("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+    private static final Pattern NIC_PATTERN = Pattern.compile("^([0-9]{9}[vVxX]|[0-9]{12})$");
 
     @Transactional
     public TokenResponse login(authLoginDTO request) {
@@ -99,13 +100,15 @@ public class AuthService {
     public @ResponseBody String register_donor(donorCreateDTO _user) {
         checkPhoneNum(_user.getPhoneNum());
         checkEmail(_user.getEmail());
+        checkNIC(_user.getNic());
+        checkBloodType(_user.getBloodType());
 
         Donor user = new Donor();
         AuthEntity auth = new AuthEntity();
 
         user.setF_Name(_user.getF_Name());
         user.setL_Name(_user.getL_Name());
-        user.setNIC(_user.getNIC());
+        user.setNic(_user.getNic());
         user.setBloodType(_user.getBloodType());
         user.setDob(_user.getDob());
         user.setPhoneNum(_user.getPhoneNum());
@@ -169,6 +172,9 @@ public class AuthService {
     public Iterable<Admin> getAdmins() {
         return adminRepo.findAll();
     }
+    public Iterable<Hospital> getHospitals() {
+        return hospitalRepo.findAll();
+    }
 
     public void checkPhoneNum(String phoneNum) {
         if (phoneNum == null || !phoneNum.matches("\\d{10}")) {
@@ -180,5 +186,21 @@ public class AuthService {
         Matcher matcher = EMAIL_PATTERN.matcher(email);
         if (!matcher.matches())
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid Email Address");
+    }
+
+    public void checkNIC(String NIC) {
+        if (NIC != null) {
+            Matcher matcher = NIC_PATTERN.matcher(NIC);
+            if (!matcher.matches())
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid NIC Number");
+        }
+        else {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid NIC Number");
+        }
+    }
+
+    private void checkBloodType(String bloodType) {
+        if (!bloodTypeList.list.contains(bloodType))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid Blood Type");
     }
 }
