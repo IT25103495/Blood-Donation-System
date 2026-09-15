@@ -27,6 +27,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class AuthService {
@@ -44,6 +46,9 @@ public class AuthService {
     JwtUtil jwtUtil;
     @Autowired
     PasswordEncoder encoder;
+
+    private static final String EMAIL_REGEX = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
+    private static final Pattern EMAIL_PATTERN = Pattern.compile(EMAIL_REGEX);
 
     @Transactional
     public TokenResponse login(authLoginDTO request) {
@@ -70,6 +75,7 @@ public class AuthService {
     @Transactional
     public @ResponseBody String register_admin(adminCreateDTO _user) {
         checkPhoneNum(_user.getPhoneNum());
+        checkEmail(_user.getEmail());
 
         Admin user = new Admin();
         AuthEntity auth = new AuthEntity();
@@ -91,6 +97,7 @@ public class AuthService {
     @Transactional
     public @ResponseBody String register_donor(donorCreateDTO _user) {
         checkPhoneNum(_user.getPhoneNum());
+        checkEmail(_user.getEmail());
 
         Donor user = new Donor();
         AuthEntity auth = new AuthEntity();
@@ -116,6 +123,7 @@ public class AuthService {
     @Transactional
     public @ResponseBody String register_hospital(hospitalCreateDTO _user) {
         checkPhoneNum(_user.getPhoneNum());
+        checkEmail(_user.getEmail());
 
         Hospital user = new Hospital();
         AuthEntity auth = new AuthEntity();
@@ -138,6 +146,7 @@ public class AuthService {
     @Transactional
     public @ResponseBody String register_hoster(hosterCreateDTO _user) {
         checkPhoneNum(_user.getPhoneNum());
+        checkEmail(_user.getEmail());
 
         Hoster user = new Hoster();
         AuthEntity auth = new AuthEntity();
@@ -158,10 +167,13 @@ public class AuthService {
 
     public void checkPhoneNum(String phoneNum) {
         if (phoneNum == null || !phoneNum.matches("\\d{10}")) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Phone number must be exactly 10 digits"
-            );
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Phone number must be exactly 10 digits");
         }
+    }
+
+    public void checkEmail(String email) {
+        Matcher matcher = EMAIL_PATTERN.matcher(email);
+        if (!matcher.matches())
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid Email Address");
     }
 }
