@@ -3,3 +3,4 @@
 /Plan.txt
 backend/backend/data/db.mv.db
 backend/backend/data/db.trace.db
+.DS_Store
