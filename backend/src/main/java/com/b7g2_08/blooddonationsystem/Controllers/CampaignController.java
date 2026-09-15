@@ -6,7 +6,6 @@ import com.b7g2_08.blooddonationsystem.Enums.campStatus;
 import com.b7g2_08.blooddonationsystem.Models.Campaign;
 import com.b7g2_08.blooddonationsystem.Repos.CampaignRepository;
 import com.b7g2_08.blooddonationsystem.Services.CampaignService;
-import com.b7g2_08.blooddonationsystem.Services.InventoryService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -46,6 +45,12 @@ public class CampaignController {
     @PatchMapping("/{id}")
     public @ResponseBody String updateStatus(@PathVariable int id, @RequestParam campStatus status) {
         return campaignService.updateCampaignStatus(id, status);
+
+    }
+
+    @PutMapping("/assignVenue")
+    public @ResponseBody String assignVenue(@RequestParam int campID, @RequestParam int venueID) {
+        return campaignService.assignVenue(campID, venueID);
 
     }
 

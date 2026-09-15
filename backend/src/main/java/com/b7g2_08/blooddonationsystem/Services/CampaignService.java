@@ -60,6 +60,20 @@ public class CampaignService {
         return "Updated";
     }
 
+    @Transactional
+    public @ResponseBody String assignVenue(int campID, int venueID) {
+        Campaign camp = campaignRepository.findById(campID).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Campaign Not Found"));
+        Venue venue = venueRepository.findById(venueID).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Venue Not Found"));
+
+        Set<Venue> set = camp.getVenueSet();
+        set.add(venue);
+        camp.setVenueSet(set);
+
+        campaignRepository.save(camp);
+
+        return "Venue Assigned";
+    }
+
     public @ResponseBody String updateCampaign(Integer campId, campaignUpdateDTO campaignUpdateDTO) {
 
         Campaign campaign = campaignRepository.findById(campId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Campaign Not Found"));
