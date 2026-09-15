@@ -5,7 +5,9 @@ import com.b7g2_08.blooddonationsystem.Models.Users.Admin;
 import com.b7g2_08.blooddonationsystem.Models.Users.Donor;
 import com.b7g2_08.blooddonationsystem.Models.Users.Hospital;
 import com.b7g2_08.blooddonationsystem.Models.Users.Hoster;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -14,6 +16,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.List;
 
+@JsonIdentityInfo(
+        generator = ObjectIdGenerators.PropertyGenerator.class,
+        property = "id"
+)
 @Entity
 public class AuthEntity implements UserDetails {
 

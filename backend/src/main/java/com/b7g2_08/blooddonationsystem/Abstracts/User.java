@@ -1,10 +1,16 @@
 package com.b7g2_08.blooddonationsystem.Abstracts;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.b7g2_08.blooddonationsystem.Models.AuthEntity;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 
+@JsonIdentityInfo(
+        generator = ObjectIdGenerators.PropertyGenerator.class,
+        property = "ID"
+)
 @MappedSuperclass
 public abstract class User {
     @Id
