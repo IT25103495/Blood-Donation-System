@@ -65,8 +65,9 @@ public class AuthService {
         else {
             token.setToken(jwtUtil.generateToken(opAuth.get().getUsername()));
             token.setSuccess(true);
-            //TODO: Change how this works so the role can be an admin sub-type for more advanced permissions
             token.setRole(opAuth.get().getUserType().name());
+            if (opAuth.get().getUserType() == userType.ADMIN)
+                token.setAdminType(opAuth.get().getAdmin().getType());
         }
 
         return token;
@@ -163,6 +164,10 @@ public class AuthService {
         authRepo.save(auth);
         hosterRepo.save(user);
         return "Registered";
+    }
+
+    public Iterable<Admin> getAdmins() {
+        return adminRepo.findAll();
     }
 
     public void checkPhoneNum(String phoneNum) {
