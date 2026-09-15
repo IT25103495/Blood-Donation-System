@@ -5,23 +5,23 @@ import java.time.LocalDate;
 public class appointmentCreateDTO {
 
     protected LocalDate date;
-    protected int campId;
-    protected int donorID;
-    protected int venueID;
+    protected Integer campId;
+    protected Integer donorID;
+    protected Integer venueID;
 
     public LocalDate getDate() {
         return date;
     }
 
-    public int getCampId() {
+    public Integer getCampId() {
         return campId;
     }
 
-    public int getDonorID() {
+    public Integer getDonorID() {
         return donorID;
     }
 
-    public int getVenueID() {
+    public Integer getVenueID() {
         return venueID;
     }
 

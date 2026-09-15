@@ -1,13 +1,15 @@
 package com.b7g2_08.blooddonationsystem.Controllers;
 
 import com.b7g2_08.blooddonationsystem.DTOs.Appointment.appointmentCreateDTO;
-import com.b7g2_08.blooddonationsystem.Models.Appointment;
-import com.b7g2_08.blooddonationsystem.Repos.AppointmentRepository;
+import com.b7g2_08.blooddonationsystem.DTOs.Appointment.appointmentResponseDTO;
 import com.b7g2_08.blooddonationsystem.Services.AppointmentService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Controller
 @CrossOrigin
@@ -15,8 +17,6 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping(path="/api/appointment")
 public class AppointmentController {
 
-    @Autowired
-    private AppointmentRepository appointmentRepo;
     @Autowired
     private AppointmentService appointmentService;
 
@@ -26,8 +26,18 @@ public class AppointmentController {
         return appointmentService.addNewAppointment(appointmentCreateDTO);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping()
-    public @ResponseBody Iterable<Appointment> getAllAppointments() {
-        return appointmentRepo.findAll();
+    public @ResponseBody List<appointmentResponseDTO> getAllAppointments() {
+
+        return appointmentService.getAllAppointments();
     }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/{id}")
+    public @ResponseBody appointmentResponseDTO getAppointmentById(@PathVariable int id) {
+        return appointmentService.getAppointmentById(id);
+    }
+
+
 }

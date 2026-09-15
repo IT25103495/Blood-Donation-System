@@ -1,6 +1,7 @@
 package com.b7g2_08.blooddonationsystem.Services;
 
 import com.b7g2_08.blooddonationsystem.DTOs.Appointment.appointmentCreateDTO;
+import com.b7g2_08.blooddonationsystem.DTOs.Appointment.appointmentResponseDTO;
 import com.b7g2_08.blooddonationsystem.Enums.appStatus;
 import com.b7g2_08.blooddonationsystem.Models.Appointment;
 import com.b7g2_08.blooddonationsystem.Models.Campaign;
@@ -16,6 +17,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class AppointmentService {
@@ -47,6 +51,25 @@ public class AppointmentService {
         appointmentRepository.save(appointment);
         return "Saved";
 
+    }
+
+    @Transactional
+    public List<appointmentResponseDTO> getAllAppointments() {
+        List<appointmentResponseDTO> result = new ArrayList<>();
+
+        for (Appointment appointment : appointmentRepository.findAll()) {
+            result.add(new appointmentResponseDTO(appointment));
+        }
+
+        return result;
+    }
+
+    @Transactional
+    public appointmentResponseDTO getAppointmentById(int id) {
+        Appointment appointment = appointmentRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Appointment Not Found!"));
+
+        return new appointmentResponseDTO(appointment);
     }
 
 
