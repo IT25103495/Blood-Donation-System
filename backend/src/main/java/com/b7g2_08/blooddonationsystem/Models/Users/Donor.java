@@ -1,5 +1,6 @@
 package com.b7g2_08.blooddonationsystem.Models.Users;
 
+import com.b7g2_08.blooddonationsystem.Enums.bloodTypeList;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -17,7 +18,7 @@ public class Donor extends User {
     private String l_Name;
 
     @Column(name = "NIC")
-    private String NIC;
+    private String nic;
 
     @Column(name = "Blood Type")
     private String bloodType;
@@ -57,11 +58,11 @@ public class Donor extends User {
         this.dob = dob;
     }
 
-    public String getNIC() {
-        return NIC;
+    public String getNic() {
+        return nic;
     }
 
-    public void setNIC(String NIC) {
-        this.NIC = NIC;
+    public void setNic(String NIC) {
+        this.nic = nic;
     }
 }

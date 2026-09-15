@@ -59,8 +59,7 @@ public class Inventory {
     }
 
     public void setBloodType(String bloodType) {
-        if (bloodTypeList.list.contains(bloodType))
-            this.bloodType = bloodType;
+        this.bloodType = bloodType;
     }
 
     public LocalDate getDateCollected() {

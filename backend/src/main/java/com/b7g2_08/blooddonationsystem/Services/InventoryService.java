@@ -2,6 +2,7 @@ package com.b7g2_08.blooddonationsystem.Services;
 
 import com.b7g2_08.blooddonationsystem.DTOs.Inventory.inventoryCreateDTO;
 import com.b7g2_08.blooddonationsystem.DTOs.Inventory.inventoryStatusDTO;
+import com.b7g2_08.blooddonationsystem.Enums.bloodTypeList;
 import com.b7g2_08.blooddonationsystem.Enums.itemStatus;
 import com.b7g2_08.blooddonationsystem.Models.Appointment;
 import com.b7g2_08.blooddonationsystem.Models.Bank;
@@ -28,6 +29,7 @@ public class InventoryService {
     //TODO: When 'DOCTOR' admins log in and set an appointment to 'completed' it should run this method with the necessary data automatically - will need another method to do that
     @Transactional
     public @ResponseBody String addNewInventory(inventoryCreateDTO _item) {
+        checkBloodType(_item.getBloodType());
         Inventory item = new Inventory();
 
         //Fetches the appointment and bank objects by the IDs provided in the DTO
@@ -60,5 +62,10 @@ public class InventoryService {
             return "Deleted";
         }
         else return "Not Found";
+    }
+
+    private void checkBloodType(String bloodType) {
+        if (!bloodTypeList.list.contains(bloodType))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid Blood Type");
     }
 }
