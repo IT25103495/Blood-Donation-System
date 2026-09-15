@@ -1,5 +1,6 @@
 package com.b7g2_08.blooddonationsystem.Models;
 
+import com.b7g2_08.blooddonationsystem.Enums.bloodTypeList;
 import com.b7g2_08.blooddonationsystem.Enums.itemStatus;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIdentityReference;
@@ -8,6 +9,7 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
+import java.util.Arrays;
 
 @JsonIdentityInfo(
         generator = ObjectIdGenerators.PropertyGenerator.class,
@@ -57,7 +59,8 @@ public class Inventory {
     }
 
     public void setBloodType(String bloodType) {
-        this.bloodType = bloodType;
+        if (bloodTypeList.list.contains(bloodType))
+            this.bloodType = bloodType;
     }
 
     public LocalDate getDateCollected() {
