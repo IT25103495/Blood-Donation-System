@@ -43,10 +43,10 @@ public class SecurityConfig {
                         .frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**").permitAll()
-                        .requestMatchers("/student/add","/instructor/add").permitAll()
                         .requestMatchers("/api/admin/**").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                        .requestMatchers("/localhost:5173/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/campaigns/public").permitAll()
                         .anyRequest().authenticated()
                 )
