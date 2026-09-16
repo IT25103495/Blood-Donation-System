@@ -69,18 +69,34 @@ public class BankService {
         return bankRepository.save(existingBank);
     }
 
-    //Delete a bank
-    public void deleteBloodBank(Integer id) {
-        if (bankRepository.existsById(id)) {
-            throw new RuntimeException("Blood bank not found with ID: " + id);
+    // Delete a bank
+    public @ResponseBody String deleteBloodBank(Integer id) {
+        // Check if the bank does NOT exist
+        if (!bankRepository.existsById(id)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Blood bank not found with ID: " + id);
         }
 
-        //Data integrity violation(Check the bank got active inventories)
-        try{
+        // Data integrity violation (Check if the bank has active inventories)
+        try {
             bankRepository.deleteById(id);
-        } catch(DataIntegrityViolationException e){
-            throw new RuntimeException("Cannot delete this blood bank because it currently holds active inventory.");
+            return "Deleted Successfully";
+        } catch (DataIntegrityViolationException e) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Cannot delete this blood bank because it currently holds active inventory.");
         }
     }
+
+//    //Delete a bank
+//    public void deleteBloodBank(Integer id) {
+//        if (bankRepository.existsById(id)) {
+//            throw new RuntimeException("Blood bank not found with ID: " + id);
+//        }
+//
+//        //Data integrity violation(Check the bank got active inventories)
+//        try{
+//            bankRepository.deleteById(id);
+//        } catch(DataIntegrityViolationException e){
+//            throw new RuntimeException("Cannot delete this blood bank because it currently holds active inventory.");
+//        }
+//    }
 
 }
