@@ -1,4 +1,6 @@
 export { authApi } from '../../prompts/frontend-api-layer/src/api/auth'
 export { campaignsApi, bookableCampaigns } from '../../prompts/frontend-api-layer/src/api/campaigns'
 export { appointmentsApi } from '../../prompts/frontend-api-layer/src/api/appointments'
+export { venuesApi } from '../../prompts/frontend-api-layer/src/api/venues'
+export { requestsApi } from '../../prompts/frontend-api-layer/src/api/requests'
 export { getErrorMessage } from '../../prompts/frontend-api-layer/src/api/client'
