@@ -64,11 +64,22 @@ public class AuthService {
             token.setError("Invalid Username or Password");
         }
         else {
+            int ID;
+
             token.setToken(jwtUtil.generateToken(opAuth.get().getUsername()));
             token.setSuccess(true);
             token.setRole(opAuth.get().getUserType().name());
-            if (opAuth.get().getUserType() == userType.ADMIN)
-                token.setAdminType(opAuth.get().getAdmin().getType());
+            switch(opAuth.get().getUserType()) {
+                case userType.ADMIN -> {
+                    token.setAdminType(opAuth.get().getAdmin().getType());
+                    ID = opAuth.get().getAdmin().getID();
+                }
+                case userType.DONOR -> ID = opAuth.get().getDonor().getID();
+                case userType.HOSPITAL -> ID = opAuth.get().getHospital().getID();
+                case userType.HOSTER -> ID = opAuth.get().getHoster().getID();
+                default -> ID = 0;
+            }
+            token.setUserID(ID);
         }
 
         return token;
