@@ -12,4 +12,3 @@ export const PAGE_SIZE = 50;
 export const TOKEN_KEY = 'bd_token';
 export const ROLE_KEY = 'bd_role';
 export const ADMIN_TYPE_KEY = 'bd_admin_type';
-export const USER_ID_KEY = 'bd_user_id';

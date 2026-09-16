@@ -14,10 +14,5 @@ export const authApi = {
   registerHospital: (body: HospitalCreate) => api.post<string>('/auth/register/hospital', body).then((r) => r.data),
   registerAdmin: (body: AdminCreate) => api.post<string>('/auth/register/admin', body).then((r) => r.data),
   getHospitals: () => api.get('/auth/get/hospitalList').then((r) => toArray<Hospital>(r.data)),
-  getAdmins: () => api.get('/auth/get/adminList').then((r) =>
-    toArray<Admin & { ID?: number }>(r.data).map((admin) => ({
-      ...admin,
-      id: admin.id ?? admin.ID ?? 0,
-    })),
-  ),
+  getAdmins: () => api.get('/auth/get/adminList').then((r) => toArray<Admin>(r.data)),
 };
