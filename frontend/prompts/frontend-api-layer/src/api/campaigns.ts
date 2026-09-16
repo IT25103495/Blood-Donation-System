@@ -3,6 +3,7 @@ import type { Campaign, CampaignCreate, CampaignStatus, CampaignUpdate } from '.
 
 export const campaignsApi = {
   getAll: () => api.get('/api/campaigns').then((r) => toArray<Campaign>(r.data)),
+  getPublic: () => api.get('/api/campaigns/public').then((r) => toArray<Campaign>(r.data)),
   getById: (id: number) => api.get<Campaign>(`/api/campaigns/${id}`).then((r) => r.data),
   getByHoster: (hosterID: number) =>
     api.get(`/api/campaigns/hoster/${hosterID}`).then((r) => toArray<Campaign>(r.data)),
