@@ -112,6 +112,16 @@ public class AppointmentService {
     }
 
 
+    @Transactional
+    public List<appointmentResponseDTO> getAppointmentsByDonor(int donorID) {
+        List<appointmentResponseDTO> result = new ArrayList<>();
+
+        for (Appointment appointment : appointmentRepository.findByDonor_ID(donorID)) {
+            result.add(new appointmentResponseDTO(appointment));
+        }
+
+        return result;
+    }
 
 
 }
