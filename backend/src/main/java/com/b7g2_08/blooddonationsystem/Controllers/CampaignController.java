@@ -34,6 +34,12 @@ public class CampaignController {
         return campaignRepository.findAll();
     }
 
+    @GetMapping("/public")
+    public @ResponseBody Iterable<Campaign> getAllApprovedCampaigns() {
+        return campaignService.getAllApprovedCampaigns();
+    }
+
+
     @GetMapping("/{id}")
     public @ResponseBody ResponseEntity<Campaign> getCampaignById(@PathVariable int id) {
         return campaignRepository.findById(id)
