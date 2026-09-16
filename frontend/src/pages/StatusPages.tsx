@@ -1,0 +1,4 @@
+import { Link } from 'react-router-dom'
+export function ForbiddenPage() { return <StatusPage code="403" title="Access denied" text="You do not have permission to view this page." /> }
+export function NotFoundPage() { return <StatusPage code="404" title="Page not found" text="The page you are looking for does not exist." /> }
+function StatusPage({ code, title, text }: { code: string; title: string; text: string }) { return <div className="mx-auto flex min-h-[calc(100vh-9rem)] max-w-lg items-center justify-center px-4 py-12 text-center"><div><p className="text-7xl font-bold text-red-700">{code}</p><h1 className="app-title mt-4 text-3xl font-bold text-slate-950">{title}</h1><p className="mt-3 text-slate-600">{text}</p><Link className="mt-6 inline-flex rounded-md bg-red-700 px-5 py-3 font-semibold text-white hover:bg-red-800" to="/">Return home</Link></div></div> }
