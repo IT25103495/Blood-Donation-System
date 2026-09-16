@@ -7,4 +7,3 @@ backend/backend/data/db.trace.db
 backend/backend/db.mv.db
 backend/backend/db.trace.db
 frontend/.env
-frontend/.env
