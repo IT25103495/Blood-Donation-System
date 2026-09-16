@@ -24,13 +24,14 @@ export const appointmentsApi = {
     api.get('/api/appointment').then((r) => toArray<AppointmentResponseRaw>(r.data).map(mapAppointment)),
   getById: (id: number) =>
     api.get<AppointmentResponseRaw>(`/api/appointment/${id}`).then((r) => mapAppointment(r.data)),
-  /**
-   * TODO: backend has no "appointments by donor" endpoint yet.
-   * Filtering the full list on the client works for the demo but exposes every
-   * donor's appointments to the browser. Replace with GET /api/appointment/donor/{id}.
-   */
-  getForDonor: async (donorID: number) =>
-    (await appointmentsApi.getAll()).filter((a) => a.donor.donorID === donorID),
+  getForDonor: (donorID: number) => {
+    if (!Number.isInteger(donorID) || donorID <= 0) {
+      return Promise.reject(new Error('Your account ID is missing from the login token. Contact support.'));
+    }
+    return api.get(`/api/appointment/donor/${donorID}`).then((r) =>
+      toArray<AppointmentResponseRaw>(r.data).map(mapAppointment),
+    );
+  },
   getForVenue: async (venueID: number) =>
     (await appointmentsApi.getAll()).filter((a) => a.venue.venueID === venueID),
   create: (body: AppointmentCreate) => api.post<string>('/api/appointment', body).then((r) => r.data),

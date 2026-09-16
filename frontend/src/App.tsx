@@ -10,6 +10,8 @@ import { ComingSoonPage } from './pages/donor/ComingSoonPage'
 import { DonorDashboardPage } from './pages/donor/DonorDashboardPage'
 import { EligibilityPage } from './pages/EligibilityPage'
 import { HomePage } from './pages/HomePage'
+import { HosterPage } from './pages/hoster/HosterPage'
+import { HospitalPage } from './pages/hospital/HospitalPage'
 import { LoginPage } from './pages/LoginPage'
 import { RegisterPage } from './pages/RegisterPage'
 import { ForbiddenPage, NotFoundPage } from './pages/StatusPages'
@@ -44,8 +46,8 @@ function AppRoutes() {
           <Route path="donor/password" element={<ComingSoonPage title="Change password" />} />
         </Route>
       </Route>
-      <Route element={<ProtectedRoute allowedRoles={['HOSTER']} />}><Route element={<AppLayout />}><Route path="hoster" element={<Placeholder title="Campaign host workspace" description="Your campaign tools will appear here." />} /></Route></Route>
-      <Route element={<ProtectedRoute allowedRoles={['HOSPITAL']} />}><Route element={<AppLayout />}><Route path="hospital" element={<Placeholder title="Hospital workspace" description="Your hospital requests will appear here." />} /></Route></Route>
+      <Route element={<ProtectedRoute allowedRoles={['HOSTER']} />}><Route element={<AppLayout />}><Route path="hoster" element={<HosterPage />} /></Route></Route>
+      <Route element={<ProtectedRoute allowedRoles={['HOSPITAL']} />}><Route element={<AppLayout />}><Route path="hospital" element={<HospitalPage />} /></Route></Route>
       <Route element={<ProtectedRoute allowedRoles={['ADMIN']} allowedAdminTypes={['DOCTOR']} />}><Route element={<AppLayout />}><Route path="staff" element={<Placeholder title="Staff workspace" description="Staff operations will appear here." />} /></Route></Route>
       <Route element={<ProtectedRoute allowedRoles={['ADMIN']} allowedAdminTypes={['MANAGER', 'SYSADMIN']} />}><Route element={<AppLayout />}><Route path="admin" element={<Placeholder title="Admin portal" description="Administration tools will appear here." />} /></Route></Route>
       <Route element={<ProtectedRoute allowedRoles={['ADMIN', 'HOSTER', 'HOSPITAL']} />}><Route element={<AppLayout />}>

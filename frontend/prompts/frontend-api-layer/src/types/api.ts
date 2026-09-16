@@ -115,6 +115,7 @@ export interface TokenResponse {
   token: string;
   role: string;
   adminType?: AdminType | null;
+  userID?: number;
   success: boolean;
   error?: string | null;
 }
