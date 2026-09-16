@@ -75,6 +75,7 @@ public class CampaignService {
         return "Venue Assigned";
     }
 
+    @Transactional
     public @ResponseBody String updateCampaign(Integer campId, campaignUpdateDTO campaignUpdateDTO) {
 
         Campaign campaign = campaignRepository.findById(campId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Campaign Not Found"));
@@ -97,11 +98,17 @@ public class CampaignService {
         return "Updated";
     }
 
+    @Transactional
     public String deleteCampaign(Integer campID) {
         Campaign campaign = campaignRepository.findById(campID)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Campaign Not Found"));
 
         campaignRepository.delete(campaign);
         return "Deleted";
+    }
+
+    @Transactional
+    public @ResponseBody Iterable<Campaign> getAllApprovedCampaigns() {
+        return campaignRepository.findByStatus(campStatus.APPROVED);
     }
 }
