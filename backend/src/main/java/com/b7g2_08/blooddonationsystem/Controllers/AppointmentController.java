@@ -66,4 +66,10 @@ public class AppointmentController {
         return appointmentService.deleteAppointment(id);
     }
 
+    @PreAuthorize("hasRole('DONOR')")
+    @GetMapping("/donor/{donor_id}")
+    public @ResponseBody List<appointmentResponseDTO> getUserAppointments(@PathVariable int donor_id) {
+        return appointmentService.getAppointmentsByDonor(donor_id);
+    }
+
 }
