@@ -26,7 +26,7 @@ public class BloodBankController {
 
     //View a specific blood bank by ID
     @GetMapping(path = "/getById")
-    public @ResponseBody ResponseEntity<Bank> getBankById(@PathVariable Integer id) {
+    public @ResponseBody ResponseEntity<Bank> getBankById(@RequestParam Integer id) {
         return bankService.getBloodBankByID(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
