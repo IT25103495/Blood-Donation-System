@@ -1,0 +1,4 @@
+import type { AppointmentStatus, CampaignStatus, InventoryStatus, RequestStatus } from '../types/api'
+type Status = AppointmentStatus | CampaignStatus | InventoryStatus | RequestStatus
+const styles: Record<Status, string> = { BOOKED: 'bg-blue-50 text-blue-700', CANCELLED: 'bg-slate-100 text-slate-600', COMPLETE: 'bg-green-50 text-green-700', PENDING: 'bg-amber-50 text-amber-700', APPROVED: 'bg-green-50 text-green-700', REJECTED: 'bg-red-50 text-red-700', EXPIRED: 'bg-slate-100 text-slate-600', AVAILABLE: 'bg-green-50 text-green-700', SHIPPED: 'bg-blue-50 text-blue-700' }
+export function StatusBadge({ status }: { status: Status }) { return <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${styles[status]}`}>{status.charAt(0) + status.slice(1).toLowerCase()}</span> }
