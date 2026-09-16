@@ -7,7 +7,7 @@ export function normalizeRole(role: string | null | undefined): Role | null {
 }
 export function getUserId(token: string | null): number | null {
   if (!token) return null
-  try { const payload = jwtDecode<{ id?: number; userId?: number; sub?: string }>(token); return payload.id ?? payload.userId ?? (payload.sub ? Number(payload.sub) : null) }
+  try { const payload = jwtDecode<{ id?: number; userId?: number; sub?: string }>(token); const candidate = payload.id ?? payload.userId ?? (payload.sub ? Number(payload.sub) : null); return typeof candidate === 'number' && Number.isFinite(candidate) ? candidate : null }
   catch { return null }
 }
 export function isExpired(token: string | null): boolean {
