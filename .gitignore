@@ -6,3 +6,4 @@ backend/backend/data/db.trace.db
 .DS_Store
 backend/backend/db.mv.db
 backend/backend/db.trace.db
+frontend/.env
