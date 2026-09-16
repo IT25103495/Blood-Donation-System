@@ -3,4 +3,6 @@ export { campaignsApi, bookableCampaigns } from '../../prompts/frontend-api-laye
 export { appointmentsApi } from '../../prompts/frontend-api-layer/src/api/appointments'
 export { venuesApi } from '../../prompts/frontend-api-layer/src/api/venues'
 export { requestsApi } from '../../prompts/frontend-api-layer/src/api/requests'
-export { getErrorMessage } from '../../prompts/frontend-api-layer/src/api/client'
+export { bloodBanksApi } from '../../prompts/frontend-api-layer/src/api/bloodBanks'
+export { inventoryApi } from '../../prompts/frontend-api-layer/src/api/inventory'
+export { getErrorMessage, isNotBuilt } from '../../prompts/frontend-api-layer/src/api/client'
