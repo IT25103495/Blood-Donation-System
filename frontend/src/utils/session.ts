@@ -15,3 +15,7 @@ export function isExpired(token: string | null): boolean {
   try { const payload = jwtDecode<{ exp?: number }>(token); return typeof payload.exp === 'number' && payload.exp * 1000 <= Date.now() }
   catch { return true }
 }
+export function getUsername(token: string | null): string | null {
+  if (!token) return null
+  try { return jwtDecode<{ sub?: string }>(token).sub ?? null } catch { return null }
+}
