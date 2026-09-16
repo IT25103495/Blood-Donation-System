@@ -2,6 +2,7 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { ToastProvider } from './context/ToastContext'
 import { AppLayout } from './layouts/AppLayout'
+import { AdminLayout } from './layouts/AdminLayout'
 import { DonorLayout } from './layouts/DonorLayout'
 import { PublicLayout } from './layouts/PublicLayout'
 import { AppointmentsPage } from './pages/donor/AppointmentsPage'
@@ -12,6 +13,9 @@ import { EligibilityPage } from './pages/EligibilityPage'
 import { HomePage } from './pages/HomePage'
 import { HosterPage } from './pages/hoster/HosterPage'
 import { HospitalPage } from './pages/hospital/HospitalPage'
+import { AdminsAdminPage, AppointmentsAdminPage, BanksAdminPage, CampaignsAdminPage, HospitalsAdminPage, InventoryAdminPage, VenuesAdminPage } from './pages/admin/AdminDataPages'
+import { AdminOverviewPage } from './pages/admin/AdminOverviewPage'
+import { ApprovalsPage } from './pages/admin/ApprovalsPage'
 import { LoginPage } from './pages/LoginPage'
 import { RegisterPage } from './pages/RegisterPage'
 import { ForbiddenPage, NotFoundPage } from './pages/StatusPages'
@@ -49,7 +53,17 @@ function AppRoutes() {
       <Route element={<ProtectedRoute allowedRoles={['HOSTER']} />}><Route element={<AppLayout />}><Route path="hoster" element={<HosterPage />} /></Route></Route>
       <Route element={<ProtectedRoute allowedRoles={['HOSPITAL']} />}><Route element={<AppLayout />}><Route path="hospital" element={<HospitalPage />} /></Route></Route>
       <Route element={<ProtectedRoute allowedRoles={['ADMIN']} allowedAdminTypes={['DOCTOR']} />}><Route element={<AppLayout />}><Route path="staff" element={<Placeholder title="Staff workspace" description="Staff operations will appear here." />} /></Route></Route>
-      <Route element={<ProtectedRoute allowedRoles={['ADMIN']} allowedAdminTypes={['MANAGER', 'SYSADMIN']} />}><Route element={<AppLayout />}><Route path="admin" element={<Placeholder title="Admin portal" description="Administration tools will appear here." />} /></Route></Route>
+      <Route element={<ProtectedRoute allowedRoles={['ADMIN']} allowedAdminTypes={['MANAGER', 'SYSADMIN']} />}><Route element={<AdminLayout />}>
+        <Route path="admin" element={<AdminOverviewPage />} />
+        <Route path="admin/approvals" element={<ApprovalsPage />} />
+        <Route path="admin/campaigns" element={<CampaignsAdminPage />} />
+        <Route path="admin/venues" element={<VenuesAdminPage />} />
+        <Route path="admin/banks" element={<BanksAdminPage />} />
+        <Route path="admin/appointments" element={<AppointmentsAdminPage />} />
+        <Route path="admin/inventory" element={<InventoryAdminPage />} />
+        <Route path="admin/hospitals" element={<HospitalsAdminPage />} />
+        <Route path="admin/admins" element={<AdminsAdminPage />} />
+      </Route></Route>
       <Route element={<ProtectedRoute allowedRoles={['ADMIN', 'HOSTER', 'HOSPITAL']} />}><Route element={<AppLayout />}>
         <Route path="appointments" element={<Placeholder title="Appointments" description="Manage donation appointments and upcoming campaigns." />} />
         <Route path="campaigns" element={<Placeholder title="Campaigns" description="Review donation campaigns and their venues." />} />

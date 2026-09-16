@@ -54,3 +54,7 @@ export function getErrorMessage(err: unknown): string {
   }
   return err instanceof Error ? err.message : 'Something went wrong.';
 }
+
+export function isNotBuilt(err: unknown): boolean {
+  return axios.isAxiosError(err) && (err.response?.status === 404 || err.response?.status === 405);
+}
