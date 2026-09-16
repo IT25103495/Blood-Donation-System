@@ -9,6 +9,7 @@ public class TokenResponse {
     private adminType adminType = null;
     private boolean success = false;
     private String error;
+    private Integer userID;
 
     public String getRole() {
         return role;
@@ -48,5 +49,13 @@ public class TokenResponse {
 
     public void setAdminType(adminType adminType) {
         this.adminType = adminType;
+    }
+
+    public Integer getUserID() {
+        return userID;
+    }
+
+    public void setUserID(Integer userID) {
+        this.userID = userID;
     }
 }
