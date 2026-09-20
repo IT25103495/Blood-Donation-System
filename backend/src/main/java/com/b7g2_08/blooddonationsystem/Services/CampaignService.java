@@ -1,8 +1,9 @@
 package com.b7g2_08.blooddonationsystem.Services;
 
 import com.b7g2_08.blooddonationsystem.DTOs.Campaign.campaignCreateDTO;
+import com.b7g2_08.blooddonationsystem.DTOs.Campaign.campaignGetStatusDTO;
 import com.b7g2_08.blooddonationsystem.DTOs.Campaign.campaignUpdateDTO;
-import com.b7g2_08.blooddonationsystem.DTOs.Campaign.campaignStatusUpdateDTO;
+import com.b7g2_08.blooddonationsystem.DTOs.Campaign.campaignUpdateStatusDTO;
 import com.b7g2_08.blooddonationsystem.Enums.campStatus;
 import com.b7g2_08.blooddonationsystem.Models.Campaign;
 import com.b7g2_08.blooddonationsystem.Models.Users.Hoster;
@@ -53,7 +54,14 @@ public class CampaignService {
     }
 
     @Transactional
-    public @ResponseBody String updateCampaignStatus(Integer campId, campaignStatusUpdateDTO campaignStatusUpdateDTO) {
+    public @ResponseBody campaignGetStatusDTO getCampaignStatus(Integer campId) {
+        Campaign camp = campaignRepository.findById(campId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Campaign Not Found"));
+
+        return new campaignGetStatusDTO(camp.getStatus());
+    }
+
+    @Transactional
+    public @ResponseBody String updateCampaignStatus(Integer campId, campaignUpdateStatusDTO campaignStatusUpdateDTO) {
         Campaign campaign = campaignRepository.findById(campId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Campaign Not Found"));
 
         campaign.setStatus(campaignStatusUpdateDTO.getStatus());
