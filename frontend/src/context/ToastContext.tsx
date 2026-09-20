@@ -1,0 +1,5 @@
+import { createContext, useContext, useState, type ReactNode } from 'react'
+type Toast = { message: string; tone: 'success' | 'error' }
+const ToastContext = createContext<{ showToast: (message: string, tone?: Toast['tone']) => void } | null>(null)
+export function ToastProvider({ children }: { children: ReactNode }) { const [toast, setToast] = useState<Toast | null>(null); const showToast = (message: string, tone: Toast['tone'] = 'success') => { setToast({ message, tone }); window.setTimeout(() => setToast(null), 4000) }; return <ToastContext.Provider value={{ showToast }}>{children}{toast && <div role="status" className={`fixed bottom-4 right-4 z-50 rounded-lg px-4 py-3 text-sm font-medium text-white shadow-lg ${toast.tone === 'error' ? 'bg-red-800' : 'bg-slate-900'}`}>{toast.message}</div>}</ToastContext.Provider> }
+export function useToast() { const context = useContext(ToastContext); if (!context) throw new Error('useToast must be used inside ToastProvider'); return context }

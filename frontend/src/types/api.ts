@@ -1,0 +1,1 @@
+export type * from '../../prompts/frontend-api-layer/src/types/api'
