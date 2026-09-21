@@ -1,15 +1,24 @@
 package com.b7g2_08.blooddonationsystem.DTOs.Request;
 
+import jakarta.validation.constraints.*;
+
 import java.time.LocalDate;
 import java.util.List;
 
 public class requestUpdateDTO {
+
+    @NotNull
     private Integer reqID;
 
-    private List<Integer> quantities;
+    @NotNull(message = "quantities is required")
+    @Size(min = 8, max = 8, message = "quantities must have one entry per blood type (8)")
+    private List<@NotNull @PositiveOrZero Integer> quantities;
 
+    @NotNull(message = "deadline is required")
+    @FutureOrPresent(message = "deadline cannot be in the past")
     private LocalDate deadline;
 
+    @NotNull
     private Integer hospitalID;
 
     public Integer getReqID() {
