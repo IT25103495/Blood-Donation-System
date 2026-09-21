@@ -5,6 +5,8 @@ import com.b7g2_08.blooddonationsystem.DTOs.Campaign.campaignGetStatusDTO;
 import com.b7g2_08.blooddonationsystem.DTOs.Campaign.campaignUpdateDTO;
 import com.b7g2_08.blooddonationsystem.DTOs.Campaign.campaignUpdateStatusDTO;
 import com.b7g2_08.blooddonationsystem.Enums.campStatus;
+import com.b7g2_08.blooddonationsystem.Enums.userType;
+import com.b7g2_08.blooddonationsystem.Models.AuthEntity;
 import com.b7g2_08.blooddonationsystem.Models.Campaign;
 import com.b7g2_08.blooddonationsystem.Models.Users.Hoster;
 import com.b7g2_08.blooddonationsystem.Models.Venue;
@@ -31,11 +33,13 @@ public class CampaignService {
     private VenueRepository venueRepository;
 
 
-    public @ResponseBody String addNewCampaign(campaignCreateDTO campaignCreateDTO) {
+    public @ResponseBody String addNewCampaign(campaignCreateDTO campaignCreateDTO, AuthEntity me) {
 
         Campaign campaign = new Campaign();
-        Hoster hoster = hosterUserRepository.findById(campaignCreateDTO.getHosterID())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Hoster Not Found!"));
+        Hoster hoster = me.getHoster();
+        if (hoster == null) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only hosters can create campaigns");
+        }
         Set<Venue> venueSet = new HashSet<>();
         for (Integer venueID : campaignCreateDTO.getVenueIDs()) {
             Venue venue = venueRepository.findById(venueID)
@@ -54,8 +58,8 @@ public class CampaignService {
     }
 
     @Transactional
-    public @ResponseBody campaignGetStatusDTO getCampaignStatus(Integer campId) {
-        Campaign camp = campaignRepository.findById(campId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Campaign Not Found"));
+    public @ResponseBody campaignGetStatusDTO getCampaignStatus(Integer campId, AuthEntity me) {
+        Campaign camp = getVisibleCampaign(campId, me);
 
         return new campaignGetStatusDTO(camp.getStatus());
     }
@@ -70,8 +74,11 @@ public class CampaignService {
     }
 
     @Transactional
-    public @ResponseBody String assignVenue(int campID, int venueID) {
+    public @ResponseBody String assignVenue(int campID, int venueID, AuthEntity me) {
         Campaign camp = campaignRepository.findById(campID).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Campaign Not Found"));
+        if (!isAdmin(me) && !isOwner(camp, me)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not your campaign");
+        }
         Venue venue = venueRepository.findById(venueID).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Venue Not Found"));
 
         Set<Venue> set = camp.getVenueSet();
@@ -113,6 +120,32 @@ public class CampaignService {
 
         campaignRepository.delete(campaign);
         return "Deleted";
+    }
+
+    private boolean isAdmin(AuthEntity me) {
+        return me.getUserType() == userType.ADMIN;
+    }
+
+    private boolean isOwner(Campaign camp, AuthEntity me) {
+        return me.getHoster() != null && camp.getHoster().getID().equals(me.getHoster().getID());
+    }
+
+    // Non-approved campaigns are visible only to admins and the owning hoster (404 to avoid leaking existence)
+    @Transactional
+    public Campaign getVisibleCampaign(Integer campId, AuthEntity me) {
+        Campaign camp = campaignRepository.findById(campId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Campaign Not Found"));
+        if (camp.getStatus() != campStatus.APPROVED && !isAdmin(me) && !isOwner(camp, me)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Campaign Not Found");
+        }
+        return camp;
+    }
+
+    @Transactional
+    public Iterable<Campaign> getCampaignsByHoster(Integer hosterID, AuthEntity me) {
+        if (!isAdmin(me) && (me.getHoster() == null || !me.getHoster().getID().equals(hosterID))) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not your campaigns");
+        }
+        return campaignRepository.findByHoster_ID(hosterID);
     }
 
     @Transactional
