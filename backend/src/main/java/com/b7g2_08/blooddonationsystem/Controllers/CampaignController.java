@@ -1,8 +1,9 @@
 package com.b7g2_08.blooddonationsystem.Controllers;
 
 import com.b7g2_08.blooddonationsystem.DTOs.Campaign.campaignCreateDTO;
+import com.b7g2_08.blooddonationsystem.DTOs.Campaign.campaignGetStatusDTO;
 import com.b7g2_08.blooddonationsystem.DTOs.Campaign.campaignUpdateDTO;
-import com.b7g2_08.blooddonationsystem.DTOs.Campaign.campaignStatusUpdateDTO;
+import com.b7g2_08.blooddonationsystem.DTOs.Campaign.campaignUpdateStatusDTO;
 import com.b7g2_08.blooddonationsystem.Models.Campaign;
 import com.b7g2_08.blooddonationsystem.Repos.CampaignRepository;
 import com.b7g2_08.blooddonationsystem.Services.CampaignService;
@@ -47,15 +48,22 @@ public class CampaignController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    //view campaign status
+    @GetMapping("/{id}/status")
+    public @ResponseBody campaignGetStatusDTO getStatus(@PathVariable int id) {
+        return campaignService.getCampaignStatus(id);
+    }
+
     //update campaign status
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/{id}/status")
-    public @ResponseBody String updateStatus(@PathVariable int id, @RequestBody campaignStatusUpdateDTO status) {
+    public @ResponseBody String updateStatus(@PathVariable int id, @RequestBody campaignUpdateStatusDTO status) {
         return campaignService.updateCampaignStatus(id, status);
 
     }
 
-    @PutMapping("/assignVenue")
+    //assign venue to a campaign
+    @PutMapping("/venue")
     public @ResponseBody String assignVenue(@RequestParam int campID, @RequestParam int venueID) {
         return campaignService.assignVenue(campID, venueID);
 
