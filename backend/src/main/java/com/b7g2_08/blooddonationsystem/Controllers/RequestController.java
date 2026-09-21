@@ -1,6 +1,7 @@
 package com.b7g2_08.blooddonationsystem.Controllers;
 
 import com.b7g2_08.blooddonationsystem.DTOs.Request.requestCreateDTO;
+import com.b7g2_08.blooddonationsystem.DTOs.Request.requestGetStatusDTO;
 import com.b7g2_08.blooddonationsystem.DTOs.Request.requestUpdateDTO;
 import com.b7g2_08.blooddonationsystem.Models.Request;
 import com.b7g2_08.blooddonationsystem.Repos.RequestRepository;
@@ -14,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 @Controller
 @CrossOrigin
 @SecurityRequirement(name = "bearerAuth")
-@RequestMapping(path="/api/Request")
+@RequestMapping(path="/api/request")
 public class RequestController {
     @Autowired
     RequestRepository requestRepo;
@@ -43,8 +44,17 @@ public class RequestController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+
     @DeleteMapping(path="/delete")
     public @ResponseBody String deleteRequest(@RequestParam int ID) {
         return requestService.deleteRequest(ID);
+    }
+
+    //get request status
+
+    @GetMapping("/{req_id}/status")
+    public @ResponseBody requestGetStatusDTO getReqStatus(@PathVariable int req_id) {
+
+        return requestService.getReqStatus(req_id);
     }
 }

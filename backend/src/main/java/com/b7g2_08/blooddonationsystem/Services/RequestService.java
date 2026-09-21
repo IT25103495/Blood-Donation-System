@@ -1,6 +1,7 @@
 package com.b7g2_08.blooddonationsystem.Services;
 
 import com.b7g2_08.blooddonationsystem.DTOs.Request.requestCreateDTO;
+import com.b7g2_08.blooddonationsystem.DTOs.Request.requestGetStatusDTO;
 import com.b7g2_08.blooddonationsystem.DTOs.Request.requestUpdateDTO;
 import com.b7g2_08.blooddonationsystem.Enums.reqStatus;
 import com.b7g2_08.blooddonationsystem.Models.Request;
@@ -59,5 +60,13 @@ public class RequestService {
             return "Deleted";
         }
         else return "Not Found";
+    }
+
+    @Transactional
+    public @ResponseBody requestGetStatusDTO getReqStatus(int reqId) {
+        Request req = requestRepo.findById(reqId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Request Not Found"));
+
+        return new requestGetStatusDTO(req.getStatus());
+
     }
 }
