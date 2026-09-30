@@ -89,6 +89,7 @@ public class AuthService {
     public @ResponseBody String register_admin(adminCreateDTO _user) {
         checkPhoneNum(_user.getPhoneNum());
         checkEmail(_user.getEmail());
+        checkUsername(_user.getUsername());
 
         Admin user = new Admin();
         AuthEntity auth = new AuthEntity();
@@ -111,6 +112,7 @@ public class AuthService {
     public @ResponseBody String register_donor(donorCreateDTO _user) {
         checkPhoneNum(_user.getPhoneNum());
         checkEmail(_user.getEmail());
+        checkUsername(_user.getUsername());
         checkNIC(_user.getNic());
         checkBloodType(_user.getBloodType());
 
@@ -139,6 +141,7 @@ public class AuthService {
     public @ResponseBody String register_hospital(hospitalCreateDTO _user) {
         checkPhoneNum(_user.getPhoneNum());
         checkEmail(_user.getEmail());
+        checkUsername(_user.getUsername());
 
         Hospital user = new Hospital();
         AuthEntity auth = new AuthEntity();
@@ -162,6 +165,7 @@ public class AuthService {
     public @ResponseBody String register_hoster(hosterCreateDTO _user) {
         checkPhoneNum(_user.getPhoneNum());
         checkEmail(_user.getEmail());
+        checkUsername(_user.getUsername());
 
         Hoster user = new Hoster();
         AuthEntity auth = new AuthEntity();
@@ -190,6 +194,15 @@ public class AuthService {
     public void checkPhoneNum(String phoneNum) {
         if (phoneNum == null || !phoneNum.matches("\\d{10}")) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Phone number must be exactly 10 digits");
+        }
+    }
+
+    public void checkUsername(String username) {
+        if (username == null || username.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username is required");
+        }
+        if (authRepo.findByUsername(username).isPresent()) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Username is already taken");
         }
     }
 
