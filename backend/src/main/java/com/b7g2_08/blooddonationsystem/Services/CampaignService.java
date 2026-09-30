@@ -94,21 +94,35 @@ public class CampaignService {
     public @ResponseBody String updateCampaign(Integer campId, campaignUpdateDTO campaignUpdateDTO) {
 
         Campaign campaign = campaignRepository.findById(campId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Campaign Not Found"));
-        Hoster hoster = hosterUserRepository.findById(campaignUpdateDTO.getHosterID())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Hoster Not Found!"));
-        Set<Venue> venueSet = new HashSet<>();
-        for (Integer venueID : campaignUpdateDTO.getVenueIDs()) {
-            Venue venue = venueRepository.findById(venueID)
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Venue Not Found: " + venueID));
-            venueSet.add(venue);
+
+        // Partial update: only fields present in the request are applied, everything else keeps its current value.
+        if (campaignUpdateDTO.getName() != null) {
+            campaign.setName(campaignUpdateDTO.getName());
+        }
+        if (campaignUpdateDTO.getStartDate() != null) {
+            campaign.setStartDate(campaignUpdateDTO.getStartDate());
+        }
+        if (campaignUpdateDTO.getEndDate() != null) {
+            campaign.setEndDate(campaignUpdateDTO.getEndDate());
+        }
+        if (campaignUpdateDTO.getHosterID() != null) {
+            Hoster hoster = hosterUserRepository.findById(campaignUpdateDTO.getHosterID())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Hoster Not Found!"));
+            campaign.setHoster(hoster);
+        }
+        if (campaignUpdateDTO.getVenueIDs() != null) {
+            Set<Venue> venueSet = new HashSet<>();
+            for (Integer venueID : campaignUpdateDTO.getVenueIDs()) {
+                Venue venue = venueRepository.findById(venueID)
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Venue Not Found: " + venueID));
+                venueSet.add(venue);
+            }
+            campaign.setVenueSet(venueSet);
+        }
+        if (campaignUpdateDTO.getStatus() != null) {
+            campaign.setStatus(campaignUpdateDTO.getStatus());
         }
 
-        campaign.setName(campaignUpdateDTO.getName());
-        campaign.setEndDate(campaignUpdateDTO.getEndDate());
-        campaign.setStartDate(campaignUpdateDTO.getStartDate());
-        campaign.setHoster(hoster);
-        campaign.setVenueSet(venueSet);
-        campaign.setStatus(campaignUpdateDTO.getStatus());
         campaignRepository.save(campaign);
         return "Updated";
     }

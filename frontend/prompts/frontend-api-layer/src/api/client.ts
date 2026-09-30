@@ -42,15 +42,18 @@ export function toArray<T>(data: unknown): T[] {
 export function getErrorMessage(err: unknown): string {
   if (axios.isAxiosError(err)) {
     const data = err.response?.data as unknown;
+    const status = err.response?.status;
     if (typeof data === 'string' && data.trim()) return data;
-    if (data && typeof data === 'object') {
-      const d = data as Record<string, unknown>;
-      const msg = d.message ?? d.error;
-      if (typeof msg === 'string') return msg;
-    }
-    if (err.response?.status === 403) return 'You do not have permission to do that.';
+    const d = data && typeof data === 'object' ? (data as Record<string, unknown>) : null;
+    // Prefer a specific reason (e.g. "Username is already taken") over the generic HTTP
+    // reason phrase Spring always puts in "error" (e.g. "Forbidden"), which isn't useful on its own.
+    if (d && typeof d.message === 'string' && d.message && d.message !== d.error) return d.message;
+    if (status === 401) return 'Your session has expired. Please log in again.';
+    if (status === 403) return 'You do not have permission to do that.';
+    if (status === 404) return 'That could not be found.';
     if (!err.response) return 'Cannot reach the server. Check that the backend is running.';
-    return `Request failed (${err.response.status}).`;
+    if (d && typeof d.error === 'string' && d.error) return d.error;
+    return `Request failed (${status}).`;
   }
   return err instanceof Error ? err.message : 'Something went wrong.';
 }

@@ -91,7 +91,8 @@ export interface BloodRequest {
   quantities: number[];
   deadline: ISODate;
   status: RequestStatus;
-  hospital: Hospital;
+  hospitalID: number;
+  hospitalName: string;
 }
 
 export interface InventoryItem {
@@ -201,11 +202,11 @@ export interface BankCreate {
 export interface RequestCreate {
   quantities: number[];
   deadline: ISODate;
-  hospitalID: number;
 }
 
 export interface RequestUpdate extends RequestCreate {
   reqID: number;
+  hospitalID: number;
 }
 
 export interface InventoryCreate {

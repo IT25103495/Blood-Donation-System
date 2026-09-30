@@ -6,20 +6,15 @@ import jakarta.validation.constraints.*;
 import java.time.LocalDate;
 import java.util.Set;
 
+// Partial update: any field left out (null) keeps the campaign's current value.
 public class campaignUpdateDTO {
 
-    @NotBlank(message = "name is required")
     @Size(max = 255)
     protected String name;
-    @NotNull(message = "startDate is required")
     protected LocalDate startDate;
-    @NotNull(message = "endDate is required")
     protected LocalDate endDate;
-    @NotNull(message = "hosterID is required")
     protected Integer hosterID;
-    @NotEmpty(message = "at least one venue is required")
     protected Set<@NotNull Integer> venueIDs;
-    @NotNull(message = "status is required")
     protected campStatus status;
 
     @AssertTrue(message = "endDate must not be before startDate")
