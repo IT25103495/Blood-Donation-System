@@ -2,9 +2,11 @@ package com.b7g2_08.blooddonationsystem.Services;
 
 import com.b7g2_08.blooddonationsystem.Auth.JwtUtil;
 import com.b7g2_08.blooddonationsystem.DTOs.Admin.adminCreateDTO;
+import com.b7g2_08.blooddonationsystem.DTOs.Admin.adminUpdateDTO;
 import com.b7g2_08.blooddonationsystem.DTOs.Auth.TokenResponse;
 import com.b7g2_08.blooddonationsystem.DTOs.Auth.authLoginDTO;
 import com.b7g2_08.blooddonationsystem.DTOs.Donor.donorCreateDTO;
+import com.b7g2_08.blooddonationsystem.DTOs.Donor.donorUpdateDTO;
 import com.b7g2_08.blooddonationsystem.DTOs.Hospital.hospitalCreateDTO;
 import com.b7g2_08.blooddonationsystem.DTOs.Hoster.hosterCreateDTO;
 import com.b7g2_08.blooddonationsystem.Enums.bloodTypeList;
@@ -184,6 +186,75 @@ public class AuthService {
         return "Registered";
     }
 
+    @Transactional
+    public @ResponseBody String edit_admin(adminUpdateDTO _user) {
+        Admin user = adminRepo.findById(_user.getId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User Not Found!"));
+        AuthEntity auth = user.getAuthEntity();
+
+        if (checkNullEmpty(_user.getPhoneNum())) {
+            checkPhoneNum(_user.getPhoneNum());
+            user.setPhoneNum(_user.getPhoneNum());
+        }
+
+        if (checkNullEmpty(_user.getUsername())) {
+            checkUsername(_user.getUsername());
+            auth.setUsername(_user.getUsername());
+        }
+
+        if (checkNullEmpty(_user.getPassword()))
+            auth.setPassword(encoder.encode(_user.getPassword()));
+
+        if (checkNullEmpty(_user.getEmail())) {
+            checkEmail(_user.getEmail());
+            auth.setEmail(_user.getEmail());
+        }
+
+        authRepo.save(auth);
+        adminRepo.save(user);
+        return "Updated";
+    }
+
+    @Transactional
+    public @ResponseBody String edit_donor(donorUpdateDTO _user) {
+        Donor user = donorRepo.findById(_user.getId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User Not Found!"));
+        AuthEntity auth = user.getAuthEntity();
+
+        if (checkNullEmpty(_user.getPhoneNum())) {
+            checkPhoneNum(_user.getPhoneNum());
+            user.setPhoneNum(_user.getPhoneNum());
+        }
+
+        if (checkNullEmpty(_user.getUsername())) {
+            checkUsername(_user.getUsername());
+            auth.setUsername(_user.getUsername());
+        }
+
+        if (checkNullEmpty(_user.getPassword()))
+            auth.setPassword(encoder.encode(_user.getPassword()));
+
+        if (checkNullEmpty(_user.getEmail())) {
+            checkEmail(_user.getEmail());
+            auth.setEmail(_user.getEmail());
+        }
+
+        if (checkNullEmpty(_user.getF_Name()))
+            user.setF_Name(_user.getF_Name());
+        if (checkNullEmpty(_user.getL_Name()))
+            user.setL_Name(_user.getL_Name());
+        if (checkNullEmpty(_user.getNic()))
+            user.setNic(_user.getNic());
+        if (checkNullEmpty(_user.getBloodType()))
+            user.setBloodType(_user.getBloodType());
+        if (_user.getDob() != user.getDob())
+            user.setDob(_user.getDob());
+        if (checkNullEmpty(_user.getPhoneNum()))
+            user.setPhoneNum(_user.getPhoneNum());
+
+        authRepo.save(auth);
+        donorRepo.save(user);
+        return "Updated";
+    }
+
     public Iterable<Admin> getAdmins() {
         return adminRepo.findAll();
     }
@@ -226,5 +297,9 @@ public class AuthService {
     private void checkBloodType(String bloodType) {
         if (!bloodTypeList.list.contains(bloodType))
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid Blood Type");
+    }
+
+    private boolean checkNullEmpty(String string) {
+        return (string != null && !string.isEmpty());
     }
 }

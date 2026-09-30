@@ -1,9 +1,11 @@
 package com.b7g2_08.blooddonationsystem.Controllers;
 
 import com.b7g2_08.blooddonationsystem.DTOs.Admin.adminCreateDTO;
+import com.b7g2_08.blooddonationsystem.DTOs.Admin.adminUpdateDTO;
 import com.b7g2_08.blooddonationsystem.DTOs.Auth.TokenResponse;
 import com.b7g2_08.blooddonationsystem.DTOs.Auth.authLoginDTO;
 import com.b7g2_08.blooddonationsystem.DTOs.Donor.donorCreateDTO;
+import com.b7g2_08.blooddonationsystem.DTOs.Donor.donorUpdateDTO;
 import com.b7g2_08.blooddonationsystem.DTOs.Hospital.hospitalCreateDTO;
 import com.b7g2_08.blooddonationsystem.DTOs.Hoster.hosterCreateDTO;
 import com.b7g2_08.blooddonationsystem.Models.Users.Admin;
@@ -47,6 +49,27 @@ public class AuthController {
     public @ResponseBody String register_hoster(@RequestBody hosterCreateDTO user) {
         return authService.register_hoster(user);
     }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping(path="/edit/admin")
+    public @ResponseBody String edit_admin(@RequestBody adminUpdateDTO user) {
+        return authService.edit_admin(user);
+    }
+
+    @PreAuthorize("hasRole('DONOR')")
+    @PutMapping(path="/edit/donor")
+    public @ResponseBody String edit_donor(@RequestBody donorUpdateDTO user) {
+        return authService.edit_donor(user);
+    }
+//    @PutMapping(path="/edit/hospital")
+//    public @ResponseBody String edit_hospital(@RequestBody hospitalUpdateDTO user) {
+//        return authService.edit_hospital(user);
+//    }
+//    @PutMapping(path="/edit/hoster")
+//    public @ResponseBody String edit_hoster(@RequestBody hosterUpdateDTO user) {
+//        return authService.edit_hoster(user);
+//    }
+
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping(path = "/get/adminList")
