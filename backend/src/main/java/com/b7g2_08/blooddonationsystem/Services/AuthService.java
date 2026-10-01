@@ -8,7 +8,9 @@ import com.b7g2_08.blooddonationsystem.DTOs.Auth.authLoginDTO;
 import com.b7g2_08.blooddonationsystem.DTOs.Donor.donorCreateDTO;
 import com.b7g2_08.blooddonationsystem.DTOs.Donor.donorUpdateDTO;
 import com.b7g2_08.blooddonationsystem.DTOs.Hospital.hospitalCreateDTO;
+import com.b7g2_08.blooddonationsystem.DTOs.Hospital.hospitalUpdateDTO;
 import com.b7g2_08.blooddonationsystem.DTOs.Hoster.hosterCreateDTO;
+import com.b7g2_08.blooddonationsystem.DTOs.Hoster.hosterUpdateDTO;
 import com.b7g2_08.blooddonationsystem.Enums.bloodTypeList;
 import com.b7g2_08.blooddonationsystem.Enums.userType;
 import com.b7g2_08.blooddonationsystem.Models.AuthEntity;
@@ -255,12 +257,90 @@ public class AuthService {
         return "Updated";
     }
 
+    @Transactional
+    public @ResponseBody String edit_hospital(hospitalUpdateDTO _user) {
+        Hospital user = hospitalRepo.findById(_user.getId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User Not Found!"));
+        AuthEntity auth = user.getAuthEntity();
+
+        if (checkNullEmpty(_user.getPhoneNum())) {
+            checkPhoneNum(_user.getPhoneNum());
+            user.setPhoneNum(_user.getPhoneNum());
+        }
+
+        if (checkNullEmpty(_user.getUsername())) {
+            checkUsername(_user.getUsername());
+            auth.setUsername(_user.getUsername());
+        }
+
+        if (checkNullEmpty(_user.getPassword()))
+            auth.setPassword(encoder.encode(_user.getPassword()));
+
+        if (checkNullEmpty(_user.getEmail())) {
+            checkEmail(_user.getEmail());
+            auth.setEmail(_user.getEmail());
+        }
+
+        if (checkNullEmpty(_user.getHospitalName()))
+            user.setHospitalName(_user.getHospitalName());
+        if (checkNullEmpty(_user.getAddress()))
+            user.setAddress(_user.getAddress());
+
+        authRepo.save(auth);
+        hospitalRepo.save(user);
+        return "Updated";
+    }
+
+    @Transactional
+    public @ResponseBody String edit_hoster(hosterUpdateDTO _user) {
+        Hoster user = hosterRepo.findById(_user.getId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User Not Found!"));
+        AuthEntity auth = user.getAuthEntity();
+
+        if (checkNullEmpty(_user.getPhoneNum())) {
+            checkPhoneNum(_user.getPhoneNum());
+            user.setPhoneNum(_user.getPhoneNum());
+        }
+
+        if (checkNullEmpty(_user.getUsername())) {
+            checkUsername(_user.getUsername());
+            auth.setUsername(_user.getUsername());
+        }
+
+        if (checkNullEmpty(_user.getPassword()))
+            auth.setPassword(encoder.encode(_user.getPassword()));
+
+        if (checkNullEmpty(_user.getEmail())) {
+            checkEmail(_user.getEmail());
+            auth.setEmail(_user.getEmail());
+        }
+
+        if (checkNullEmpty(_user.getOrgName()))
+            user.setOrgName(_user.getOrgName());
+
+        authRepo.save(auth);
+        hosterRepo.save(user);
+        return "Updated";
+    }
+
     public Iterable<Admin> getAdmins() {
         return adminRepo.findAll();
     }
     public Iterable<Hospital> getHospitals() {
         return hospitalRepo.findAll();
     }
+    public Iterable<Donor> getDonors() {
+        return donorRepo.findAll();
+    }
+    public Iterable<Hoster> getHosters() {
+        return hosterRepo.findAll();
+    }
+
+    @Transactional
+    public @ResponseBody String deleteMe(AuthEntity me) {
+        authRepo.deleteById(me.getId());
+        return "Deleted";
+    }
+
+    //VERIFICATION FUNCTIONS//
 
     public void checkPhoneNum(String phoneNum) {
         if (phoneNum == null || !phoneNum.matches("\\d{10}")) {
