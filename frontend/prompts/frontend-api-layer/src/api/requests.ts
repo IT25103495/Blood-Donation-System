@@ -1,5 +1,5 @@
 import { api, toArray } from './client';
-import type { Bloodrequest, requestCreate, requestUpdate } from '../types/api';
+import type { BloodRequest, RequestCreate, RequestUpdate } from '../types/api';
 
 // Note: base path is lowercase "/api/request" (singular), unlike Venue/Inventory.
 export const requestsApi = {
