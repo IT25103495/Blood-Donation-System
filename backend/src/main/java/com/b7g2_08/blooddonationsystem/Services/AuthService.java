@@ -340,6 +340,30 @@ public class AuthService {
         return "Deleted";
     }
 
+    @Transactional
+    public @ResponseBody String deleteUser (userType type, int ID) {
+        switch(type) {
+            case userType.ADMIN -> {
+               Admin user = adminRepo.findById(ID).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User Not Found!"));
+               authRepo.delete(user.getAuthEntity());
+            }
+            case userType.DONOR -> {
+                Donor user = donorRepo.findById(ID).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User Not Found!"));
+                authRepo.delete(user.getAuthEntity());
+            }
+            case userType.HOSPITAL -> {
+                Hospital user = hospitalRepo.findById(ID).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User Not Found!"));
+                authRepo.delete(user.getAuthEntity());
+            }
+            case userType.HOSTER -> {
+                Hoster user = hosterRepo.findById(ID).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User Not Found!"));
+                authRepo.delete(user.getAuthEntity());
+            }
+            default -> {return "ERROR: Invalid User Type!";}
+        }
+        return "Deleted";
+    }
+
     //VERIFICATION FUNCTIONS//
 
     public void checkPhoneNum(String phoneNum) {

@@ -127,4 +127,10 @@ public class AuthController {
 
     @DeleteMapping(path = "/delete/me")
     public @ResponseBody String deleteMe(@AuthenticationPrincipal AuthEntity me) {return authService.deleteMe(me);}
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping(path = "/delete/user")
+    public @ResponseBody String deleteUser(@RequestParam userType type, @RequestParam int ID) {
+        return authService.deleteUser(type, ID);
+    }
 }
