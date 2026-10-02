@@ -17,10 +17,6 @@ import com.b7g2_08.blooddonationsystem.Models.Users.Admin;
 import com.b7g2_08.blooddonationsystem.Models.Users.Donor;
 import com.b7g2_08.blooddonationsystem.Models.Users.Hospital;
 import com.b7g2_08.blooddonationsystem.Models.Users.Hoster;
-import com.b7g2_08.blooddonationsystem.Repos.Users.AdminUserRepository;
-import com.b7g2_08.blooddonationsystem.Repos.Users.DonorUserRepository;
-import com.b7g2_08.blooddonationsystem.Repos.Users.HospitalUserRepository;
-import com.b7g2_08.blooddonationsystem.Repos.Users.HosterUserRepository;
 import com.b7g2_08.blooddonationsystem.Services.AuthService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,14 +33,14 @@ public class AuthController {
 
     @Autowired
     private AuthService authService;
-    @Autowired
-    private AdminUserRepository adminUserRepository;
-    @Autowired
-    private DonorUserRepository donorUserRepository;
-    @Autowired
-    private HospitalUserRepository hospitalUserRepository;
-    @Autowired
-    private HosterUserRepository hosterUserRepository;
+//    @Autowired
+//    private AdminUserRepository adminUserRepository;
+//    @Autowired
+//    private DonorUserRepository donorUserRepository;
+//    @Autowired
+//    private HospitalUserRepository hospitalUserRepository;
+//    @Autowired
+//    private HosterUserRepository hosterUserRepository;
 
     @PostMapping(path="/login") // Map ONLY POST Requests
     public @ResponseBody TokenResponse login(@RequestBody authLoginDTO user) {
@@ -127,6 +123,12 @@ public class AuthController {
 
     @DeleteMapping(path = "/delete/me")
     public @ResponseBody String deleteMe(@AuthenticationPrincipal AuthEntity me) {return authService.deleteMe(me);}
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/get/user")
+    public @ResponseBody User getUser (@RequestParam userType type, @RequestParam int ID) {
+        return authService.getUser(type, ID);
+    }
 
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping(path = "/delete/user")

@@ -1,5 +1,6 @@
 package com.b7g2_08.blooddonationsystem.Services;
 
+import com.b7g2_08.blooddonationsystem.Abstracts.User;
 import com.b7g2_08.blooddonationsystem.Auth.JwtUtil;
 import com.b7g2_08.blooddonationsystem.DTOs.Admin.adminCreateDTO;
 import com.b7g2_08.blooddonationsystem.DTOs.Admin.adminUpdateDTO;
@@ -11,6 +12,7 @@ import com.b7g2_08.blooddonationsystem.DTOs.Hospital.hospitalCreateDTO;
 import com.b7g2_08.blooddonationsystem.DTOs.Hospital.hospitalUpdateDTO;
 import com.b7g2_08.blooddonationsystem.DTOs.Hoster.hosterCreateDTO;
 import com.b7g2_08.blooddonationsystem.DTOs.Hoster.hosterUpdateDTO;
+import com.b7g2_08.blooddonationsystem.DesignPattern.User.*;
 import com.b7g2_08.blooddonationsystem.Enums.bloodTypeList;
 import com.b7g2_08.blooddonationsystem.Enums.userType;
 import com.b7g2_08.blooddonationsystem.Models.AuthEntity;
@@ -342,37 +344,42 @@ public class AuthService {
 
     @Transactional
     public @ResponseBody String deleteUser (userType type, int ID) {
+        UserContext context = setupContext(type);
+        if (context != null)
+            return context.delete(ID);
+        else
+            return "Invalid user type provided!";
+    }
+
+    public @ResponseBody User getUser (userType type, int ID) {
+        UserContext context = setupContext(type);
+        if (context != null)
+            return context.getUser(ID);
+        else
+            return null;
+    }
+
+    private UserContext setupContext(userType type) {
+        UserContext context = new UserContext();
         switch(type) {
-            case userType.ADMIN -> {
-               Admin user = adminRepo.findById(ID).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User Not Found!"));
-               authRepo.delete(user.getAuthEntity());
-            }
-            case userType.DONOR -> {
-                Donor user = donorRepo.findById(ID).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User Not Found!"));
-                authRepo.delete(user.getAuthEntity());
-            }
-            case userType.HOSPITAL -> {
-                Hospital user = hospitalRepo.findById(ID).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User Not Found!"));
-                authRepo.delete(user.getAuthEntity());
-            }
-            case userType.HOSTER -> {
-                Hoster user = hosterRepo.findById(ID).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User Not Found!"));
-                authRepo.delete(user.getAuthEntity());
-            }
-            default -> {return "ERROR: Invalid User Type!";}
+            case userType.ADMIN -> context.setStrategy(new AdminStrategy(adminRepo,authRepo));
+            case userType.DONOR -> context.setStrategy(new DonorStrategy(donorRepo,authRepo));
+            case userType.HOSPITAL -> context.setStrategy(new HospitalStrategy(hospitalRepo,authRepo));
+            case userType.HOSTER -> context.setStrategy(new HosterStrategy(hosterRepo,authRepo));
+            default -> {return null;}
         }
-        return "Deleted";
+        return context;
     }
 
     //VERIFICATION FUNCTIONS//
 
-    public void checkPhoneNum(String phoneNum) {
+    private void checkPhoneNum(String phoneNum) {
         if (phoneNum == null || !phoneNum.matches("\\d{10}")) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Phone number must be exactly 10 digits");
         }
     }
 
-    public void checkUsername(String username) {
+    private void checkUsername(String username) {
         if (username == null || username.isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username is required");
         }
@@ -381,13 +388,13 @@ public class AuthService {
         }
     }
 
-    public void checkEmail(String email) {
+    private void checkEmail(String email) {
         Matcher matcher = EMAIL_PATTERN.matcher(email);
         if (!matcher.matches())
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid Email Address");
     }
 
-    public void checkNIC(String NIC) {
+    private void checkNIC(String NIC) {
         if (NIC != null) {
             Matcher matcher = NIC_PATTERN.matcher(NIC);
             if (!matcher.matches())
