@@ -13,7 +13,13 @@ export const authApi = {
   registerHoster: (body: HosterCreate) => api.post<string>('/auth/register/hoster', body).then((r) => r.data),
   registerHospital: (body: HospitalCreate) => api.post<string>('/auth/register/hospital', body).then((r) => r.data),
   registerAdmin: (body: AdminCreate) => api.post<string>('/auth/register/admin', body).then((r) => r.data),
-  getHospitals: () => api.get('/auth/get/hospitalList').then((r) => toArray<Hospital>(r.data)),
+  // Backend serializes the id as "ID" (capital), same as admins; normalize to `id`.
+  getHospitals: () => api.get('/auth/get/hospitalList').then((r) =>
+    toArray<Hospital & { ID?: number }>(r.data).map((hospital) => ({
+      ...hospital,
+      id: hospital.id ?? hospital.ID ?? 0,
+    })),
+  ),
   getAdmins: () => api.get('/auth/get/adminList').then((r) =>
     toArray<Admin & { ID?: number }>(r.data).map((admin) => ({
       ...admin,
