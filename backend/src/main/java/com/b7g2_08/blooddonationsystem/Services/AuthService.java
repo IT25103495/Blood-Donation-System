@@ -1,12 +1,18 @@
 package com.b7g2_08.blooddonationsystem.Services;
 
+import com.b7g2_08.blooddonationsystem.Abstracts.User;
 import com.b7g2_08.blooddonationsystem.Auth.JwtUtil;
 import com.b7g2_08.blooddonationsystem.DTOs.Admin.adminCreateDTO;
+import com.b7g2_08.blooddonationsystem.DTOs.Admin.adminUpdateDTO;
 import com.b7g2_08.blooddonationsystem.DTOs.Auth.TokenResponse;
 import com.b7g2_08.blooddonationsystem.DTOs.Auth.authLoginDTO;
 import com.b7g2_08.blooddonationsystem.DTOs.Donor.donorCreateDTO;
+import com.b7g2_08.blooddonationsystem.DTOs.Donor.donorUpdateDTO;
 import com.b7g2_08.blooddonationsystem.DTOs.Hospital.hospitalCreateDTO;
+import com.b7g2_08.blooddonationsystem.DTOs.Hospital.hospitalUpdateDTO;
 import com.b7g2_08.blooddonationsystem.DTOs.Hoster.hosterCreateDTO;
+import com.b7g2_08.blooddonationsystem.DTOs.Hoster.hosterUpdateDTO;
+import com.b7g2_08.blooddonationsystem.DesignPattern.User.*;
 import com.b7g2_08.blooddonationsystem.Enums.bloodTypeList;
 import com.b7g2_08.blooddonationsystem.Enums.userType;
 import com.b7g2_08.blooddonationsystem.Models.AuthEntity;
@@ -184,20 +190,196 @@ public class AuthService {
         return "Registered";
     }
 
+    @Transactional
+    public @ResponseBody String edit_admin(adminUpdateDTO _user) {
+        Admin user = adminRepo.findById(_user.getId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User Not Found!"));
+        AuthEntity auth = user.getAuthEntity();
+
+        if (checkNullEmpty(_user.getPhoneNum())) {
+            checkPhoneNum(_user.getPhoneNum());
+            user.setPhoneNum(_user.getPhoneNum());
+        }
+
+        if (checkNullEmpty(_user.getUsername())) {
+            checkUsername(_user.getUsername());
+            auth.setUsername(_user.getUsername());
+        }
+
+        if (checkNullEmpty(_user.getPassword()))
+            auth.setPassword(encoder.encode(_user.getPassword()));
+
+        if (checkNullEmpty(_user.getEmail())) {
+            checkEmail(_user.getEmail());
+            auth.setEmail(_user.getEmail());
+        }
+
+        authRepo.save(auth);
+        adminRepo.save(user);
+        return "Updated";
+    }
+
+    @Transactional
+    public @ResponseBody String edit_donor(donorUpdateDTO _user) {
+        Donor user = donorRepo.findById(_user.getId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User Not Found!"));
+        AuthEntity auth = user.getAuthEntity();
+
+        if (checkNullEmpty(_user.getPhoneNum())) {
+            checkPhoneNum(_user.getPhoneNum());
+            user.setPhoneNum(_user.getPhoneNum());
+        }
+
+        if (checkNullEmpty(_user.getUsername())) {
+            checkUsername(_user.getUsername());
+            auth.setUsername(_user.getUsername());
+        }
+
+        if (checkNullEmpty(_user.getPassword()))
+            auth.setPassword(encoder.encode(_user.getPassword()));
+
+        if (checkNullEmpty(_user.getEmail())) {
+            checkEmail(_user.getEmail());
+            auth.setEmail(_user.getEmail());
+        }
+
+        if (checkNullEmpty(_user.getF_Name()))
+            user.setF_Name(_user.getF_Name());
+        if (checkNullEmpty(_user.getL_Name()))
+            user.setL_Name(_user.getL_Name());
+        if (checkNullEmpty(_user.getNic()))
+            user.setNic(_user.getNic());
+        if (checkNullEmpty(_user.getBloodType()))
+            user.setBloodType(_user.getBloodType());
+        if (_user.getDob() != user.getDob())
+            user.setDob(_user.getDob());
+        if (checkNullEmpty(_user.getPhoneNum()))
+            user.setPhoneNum(_user.getPhoneNum());
+
+        authRepo.save(auth);
+        donorRepo.save(user);
+        return "Updated";
+    }
+
+    @Transactional
+    public @ResponseBody String edit_hospital(hospitalUpdateDTO _user) {
+        Hospital user = hospitalRepo.findById(_user.getId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User Not Found!"));
+        AuthEntity auth = user.getAuthEntity();
+
+        if (checkNullEmpty(_user.getPhoneNum())) {
+            checkPhoneNum(_user.getPhoneNum());
+            user.setPhoneNum(_user.getPhoneNum());
+        }
+
+        if (checkNullEmpty(_user.getUsername())) {
+            checkUsername(_user.getUsername());
+            auth.setUsername(_user.getUsername());
+        }
+
+        if (checkNullEmpty(_user.getPassword()))
+            auth.setPassword(encoder.encode(_user.getPassword()));
+
+        if (checkNullEmpty(_user.getEmail())) {
+            checkEmail(_user.getEmail());
+            auth.setEmail(_user.getEmail());
+        }
+
+        if (checkNullEmpty(_user.getHospitalName()))
+            user.setHospitalName(_user.getHospitalName());
+        if (checkNullEmpty(_user.getAddress()))
+            user.setAddress(_user.getAddress());
+
+        authRepo.save(auth);
+        hospitalRepo.save(user);
+        return "Updated";
+    }
+
+    @Transactional
+    public @ResponseBody String edit_hoster(hosterUpdateDTO _user) {
+        Hoster user = hosterRepo.findById(_user.getId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User Not Found!"));
+        AuthEntity auth = user.getAuthEntity();
+
+        if (checkNullEmpty(_user.getPhoneNum())) {
+            checkPhoneNum(_user.getPhoneNum());
+            user.setPhoneNum(_user.getPhoneNum());
+        }
+
+        if (checkNullEmpty(_user.getUsername())) {
+            checkUsername(_user.getUsername());
+            auth.setUsername(_user.getUsername());
+        }
+
+        if (checkNullEmpty(_user.getPassword()))
+            auth.setPassword(encoder.encode(_user.getPassword()));
+
+        if (checkNullEmpty(_user.getEmail())) {
+            checkEmail(_user.getEmail());
+            auth.setEmail(_user.getEmail());
+        }
+
+        if (checkNullEmpty(_user.getOrgName()))
+            user.setOrgName(_user.getOrgName());
+
+        authRepo.save(auth);
+        hosterRepo.save(user);
+        return "Updated";
+    }
+
     public Iterable<Admin> getAdmins() {
         return adminRepo.findAll();
     }
     public Iterable<Hospital> getHospitals() {
         return hospitalRepo.findAll();
     }
+    public Iterable<Donor> getDonors() {
+        return donorRepo.findAll();
+    }
+    public Iterable<Hoster> getHosters() {
+        return hosterRepo.findAll();
+    }
 
-    public void checkPhoneNum(String phoneNum) {
+    @Transactional
+    public @ResponseBody String deleteMe(AuthEntity me) {
+        authRepo.deleteById(me.getId());
+        return "Deleted";
+    }
+
+    @Transactional
+    public @ResponseBody String deleteUser (userType type, int ID) {
+        UserContext context = setupContext(type);
+        if (context != null)
+            return context.delete(ID);
+        else
+            return "Invalid user type provided!";
+    }
+
+    public @ResponseBody User getUser (userType type, int ID) {
+        UserContext context = setupContext(type);
+        if (context != null)
+            return context.getUser(ID);
+        else
+            return null;
+    }
+
+    private UserContext setupContext(userType type) {
+        UserContext context = new UserContext();
+        switch(type) {
+            case userType.ADMIN -> context.setStrategy(new AdminStrategy(adminRepo,authRepo));
+            case userType.DONOR -> context.setStrategy(new DonorStrategy(donorRepo,authRepo));
+            case userType.HOSPITAL -> context.setStrategy(new HospitalStrategy(hospitalRepo,authRepo));
+            case userType.HOSTER -> context.setStrategy(new HosterStrategy(hosterRepo,authRepo));
+            default -> {return null;}
+        }
+        return context;
+    }
+
+    //VERIFICATION FUNCTIONS//
+
+    private void checkPhoneNum(String phoneNum) {
         if (phoneNum == null || !phoneNum.matches("\\d{10}")) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Phone number must be exactly 10 digits");
         }
     }
 
-    public void checkUsername(String username) {
+    private void checkUsername(String username) {
         if (username == null || username.isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username is required");
         }
@@ -206,13 +388,13 @@ public class AuthService {
         }
     }
 
-    public void checkEmail(String email) {
+    private void checkEmail(String email) {
         Matcher matcher = EMAIL_PATTERN.matcher(email);
         if (!matcher.matches())
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid Email Address");
     }
 
-    public void checkNIC(String NIC) {
+    private void checkNIC(String NIC) {
         if (NIC != null) {
             Matcher matcher = NIC_PATTERN.matcher(NIC);
             if (!matcher.matches())
@@ -226,5 +408,9 @@ public class AuthService {
     private void checkBloodType(String bloodType) {
         if (!bloodTypeList.list.contains(bloodType))
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid Blood Type");
+    }
+
+    private boolean checkNullEmpty(String string) {
+        return (string != null && !string.isEmpty());
     }
 }

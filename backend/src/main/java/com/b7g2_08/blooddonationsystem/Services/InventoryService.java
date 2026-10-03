@@ -57,11 +57,12 @@ public class InventoryService {
 
     @Transactional
     public @ResponseBody String deleteItem(int ID) {
-        if (inventoryRepo.existsById(ID)) {
-            inventoryRepo.deleteById(ID);
-            return "Deleted";
-        }
-        else return "Not Found";
+        Inventory item = inventoryRepo.findById(ID).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Item Not Found!"));
+        Appointment appointment = item.getAppointment();
+        appointment.setItem(null);
+        appointmentRepo.save(appointment);
+        inventoryRepo.deleteById(ID);
+        return "Deleted";
     }
 
     private void checkBloodType(String bloodType) {
