@@ -10,9 +10,10 @@ import { EligibilityPage } from './pages/EligibilityPage'
 import { HomePage } from './pages/HomePage'
 import { HosterPage } from './pages/hoster/HosterPage'
 import { HospitalPage } from './pages/hospital/HospitalPage'
-import { AdminsAdminPage, AppointmentsAdminPage, BanksAdminPage, CampaignsAdminPage, HospitalsAdminPage, InventoryAdminPage, VenuesAdminPage } from './pages/admin/AdminDataPages'
+import { AdminsAdminPage, AppointmentsAdminPage, BanksAdminPage, CampaignsAdminPage, HospitalsAdminPage, InventoryAdminPage, RequestsAdminPage, VenuesAdminPage } from './pages/admin/AdminDataPages'
 import { AdminOverviewPage } from './pages/admin/AdminOverviewPage'
-import { ApprovalsPage } from './pages/admin/ApprovalsPage'
+import { CampaignApprovalsPage } from './pages/admin/CampaignApprovalsPage'
+import { RequestApprovalsPage } from './pages/admin/RequestApprovalsPage'
 import { StaffPage } from './pages/staff/StaffPage'
 import { LoginPage } from './pages/LoginPage'
 import { RegisterPage } from './pages/RegisterPage'
@@ -66,8 +67,10 @@ function AppRoutes() {
       <Route element={<ProtectedRoute allowedRoles={['ADMIN']} allowedAdminTypes={['DOCTOR']} />}><Route element={<Suspense fallback={<LayoutFallback />}><AppLayout /></Suspense>}><Route path="staff" element={<StaffPage />} /></Route></Route>
       <Route element={<ProtectedRoute allowedRoles={['ADMIN']} allowedAdminTypes={['MANAGER', 'SYSADMIN']} />}><Route element={<Suspense fallback={<LayoutFallback />}><AdminLayout /></Suspense>}>
         <Route path="admin" element={<AdminOverviewPage />} />
-        <Route path="admin/approvals" element={<ApprovalsPage />} />
+        <Route path="admin/approvals/campaigns" element={<CampaignApprovalsPage />} />
+        <Route path="admin/approvals/requests" element={<RequestApprovalsPage />} />
         <Route path="admin/campaigns" element={<CampaignsAdminPage />} />
+        <Route path="admin/requests" element={<RequestsAdminPage />} />
         <Route path="admin/venues" element={<VenuesAdminPage />} />
         <Route path="admin/banks" element={<BanksAdminPage />} />
         <Route path="admin/appointments" element={<AppointmentsAdminPage />} />
