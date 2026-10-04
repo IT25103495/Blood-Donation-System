@@ -14,12 +14,29 @@ import { StatusBadge } from '../../components/StatusBadge'
 import { Stepper, WizardNav } from '../../components/Stepper'
 import { useToast } from '../../context/ToastContext'
 import { hostName, venueIdsOf, venuesOf } from '../../utils/campaigns'
-import type { Bank, Campaign, Hoster, Venue } from '../../types/api'
+import type { Bank, Campaign, CampaignStatus, Hoster, Venue } from '../../types/api'
 
 const today = () => new Date().toISOString().slice(0, 10)
 
 function bankName(venue: Venue, banks: Bank[]) {
   return banks.find((bank) => bank.bankID === venue.assignedBank)?.name ?? `Bank ${venue.assignedBank}`
+}
+
+const CAMPAIGN_STATUSES: CampaignStatus[] = ['PENDING', 'APPROVED', 'REJECTED']
+const STATUS_STYLES: Record<CampaignStatus, string> = { PENDING: 'bg-amber-50 text-amber-700', APPROVED: 'bg-green-50 text-green-700', REJECTED: 'bg-red-50 text-red-700' }
+
+// The status cell is the control rather than a third button in Actions: it is where the status
+// already is, it keeps the colour coding that makes the column scannable, and it costs no width
+// in a table that already scrolls sideways.
+function StatusSelect({ campaign, onChange }: { campaign: Campaign; onChange: (status: CampaignStatus) => void }) {
+  return <select
+    aria-label={`Status for ${campaign.name}`}
+    value={campaign.status}
+    onChange={(event) => onChange(event.target.value as CampaignStatus)}
+    className={`cursor-pointer rounded-full border-0 py-1 pl-2.5 pr-6 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-red-100 ${STATUS_STYLES[campaign.status]}`}
+  >
+    {CAMPAIGN_STATUSES.map((status) => <option key={status} value={status}>{status.charAt(0) + status.slice(1).toLowerCase()}</option>)}
+  </select>
 }
 
 function RowAction({ label, onClick, tone = 'neutral', disabled, title }: { label: string; onClick: () => void; tone?: 'neutral' | 'danger'; disabled?: boolean; title?: string }) {
@@ -59,12 +76,20 @@ export function CampaignsAdminPage() {
     catch (err: unknown) { showToast(getErrorMessage(err), 'error') }
   }
 
+  // The approvals queue only ever moves a campaign out of PENDING; this puts every status within
+  // reach, so a decision made by mistake can be taken back without touching the database.
+  const changeStatus = async (campaign: Campaign, status: CampaignStatus) => {
+    if (status === campaign.status) return
+    try { await campaignsApi.setStatus(campaign.campID, status); showToast(`"${campaign.name}" marked ${status.toLowerCase()}.`); load() }
+    catch (err: unknown) { showToast(getErrorMessage(err), 'error') }
+  }
+
   // Dates render as plain text so the table's search box can match on them.
   const columns: TableColumn<Campaign>[] = useMemo(() => [
     { key: 'name', header: 'Campaign', render: (row) => row.name },
     { key: 'host', header: 'Host', render: (row) => hostName(row, hosters) },
     { key: 'dates', header: 'Dates', render: (row) => `${row.startDate} to ${row.endDate}` },
-    { key: 'status', header: 'Status', render: (row) => <StatusBadge status={row.status} />, searchable: false },
+    { key: 'status', header: 'Status', render: (row) => <StatusSelect campaign={row} onChange={(status) => changeStatus(row, status)} />, searchable: false },
   ], [hosters])
 
   if (loading) return <LoadingPage />

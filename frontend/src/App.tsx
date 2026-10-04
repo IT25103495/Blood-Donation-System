@@ -69,19 +69,23 @@ function AppRoutes() {
       <Route element={<ProtectedRoute allowedRoles={['ADMIN']} allowedAdminTypes={['DOCTOR']} />}><Route element={<Suspense fallback={<LayoutFallback />}><AppLayout /></Suspense>}><Route path="staff" element={<StaffPage />} /></Route></Route>
       <Route element={<ProtectedRoute allowedRoles={['ADMIN']} allowedAdminTypes={['MANAGER', 'SYSADMIN']} />}><Route element={<Suspense fallback={<LayoutFallback />}><AdminLayout /></Suspense>}>
         <Route path="admin" element={<AdminOverviewPage />} />
-        <Route path="admin/approvals/campaigns" element={<CampaignApprovalsPage />} />
+        {/* A manager handles blood requests and the stock behind them. */}
         <Route path="admin/approvals/requests" element={<RequestApprovalsPage />} />
-        <Route path="admin/campaigns" element={<CampaignsAdminPage />} />
-        <Route path="admin/campaigns/:campID" element={<CampaignEditPage />} />
         <Route path="admin/requests" element={<RequestsAdminPage />} />
-        <Route path="admin/venues" element={<VenuesAdminPage />} />
         <Route path="admin/banks" element={<BanksAdminPage />} />
-        <Route path="admin/appointments" element={<AppointmentsAdminPage />} />
         <Route path="admin/inventory" element={<InventoryAdminPage />} />
-        <Route path="admin/users" element={<UsersPage />} />
-        {/* Hospitals and admins are two tabs on the users page now; keep the old links working. */}
-        <Route path="admin/hospitals" element={<Navigate to="/admin/users" replace />} />
-        <Route path="admin/admins" element={<Navigate to="/admin/users" replace />} />
+        {/* Everything else is the sysadmin's; the backend turns a manager away from these too. */}
+        <Route element={<ProtectedRoute allowedRoles={['ADMIN']} allowedAdminTypes={['SYSADMIN']} />}>
+          <Route path="admin/approvals/campaigns" element={<CampaignApprovalsPage />} />
+          <Route path="admin/campaigns" element={<CampaignsAdminPage />} />
+          <Route path="admin/campaigns/:campID" element={<CampaignEditPage />} />
+          <Route path="admin/venues" element={<VenuesAdminPage />} />
+          <Route path="admin/appointments" element={<AppointmentsAdminPage />} />
+          <Route path="admin/users" element={<UsersPage />} />
+          {/* Hospitals and admins are two tabs on the users page now; keep the old links working. */}
+          <Route path="admin/hospitals" element={<Navigate to="/admin/users" replace />} />
+          <Route path="admin/admins" element={<Navigate to="/admin/users" replace />} />
+        </Route>
       </Route></Route>
       <Route element={<ProtectedRoute allowedRoles={['ADMIN', 'HOSPITAL']} />}><Route element={<Suspense fallback={<LayoutFallback />}><AppLayout /></Suspense>}>
         <Route path="appointments" element={<Placeholder title="Appointments" description="Manage donation appointments and upcoming campaigns." />} />

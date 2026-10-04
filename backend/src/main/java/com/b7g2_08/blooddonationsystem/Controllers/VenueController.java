@@ -7,6 +7,7 @@ import com.b7g2_08.blooddonationsystem.Repos.VenueRepository;
 import com.b7g2_08.blooddonationsystem.Services.VenueService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -21,11 +22,13 @@ public class VenueController {
     @Autowired
     VenueService venueService;
 
+    @PreAuthorize("hasRole('SYSADMIN')")
     @PostMapping(path="/add")
     public @ResponseBody String addNewVenue(@RequestBody venueCreateDTO venue) {
         return venueService.addNewVenue(venue);
     }
 
+    @PreAuthorize("hasRole('SYSADMIN')")
     @PutMapping(path="/update")
     public @ResponseBody String updateVenue(@RequestBody venueUpdateDTO venue) {
         return venueService.updateVenue(venue);
@@ -43,6 +46,7 @@ public class VenueController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @PreAuthorize("hasRole('SYSADMIN')")
     @DeleteMapping(path="/delete")
     public @ResponseBody String deleteVenue(@RequestParam int ID) {
         return venueService.deleteVenue(ID);

@@ -31,7 +31,7 @@ public class AppointmentController {
     }
 
     // view all appointments
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('SYSADMIN','DOCTOR')")
     @GetMapping()
     public @ResponseBody List<appointmentResponseDTO> getAllAppointments() {
 
@@ -39,28 +39,28 @@ public class AppointmentController {
     }
 
     //view appointment by id
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('SYSADMIN','DOCTOR')")
     @GetMapping("/{id}")
     public @ResponseBody appointmentResponseDTO getAppointmentById(@PathVariable int id) {
         return appointmentService.getAppointmentById(id);
     }
 
     //update appointment
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('SYSADMIN','DOCTOR')")
     @PutMapping("/{id}")
     public @ResponseBody String updateAppointment(@PathVariable int id,@RequestBody appointmentUpdateDTO appointmentUpdateDTO) {
         return appointmentService.updateAppointment(id, appointmentUpdateDTO);
     }
 
     //update appointment status
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('SYSADMIN','DOCTOR')")
     @PostMapping("/{id}/status")
     public @ResponseBody String updateAppointmentStatus(@PathVariable int id,@RequestBody appointmentStatusUpdateDTO status) {
         return appointmentService.updateAppointmentStatus(id, status);
     }
 
     //delete appointment
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('SYSADMIN')")
     @DeleteMapping("/{id}")
     public @ResponseBody String deleteAppointment(@PathVariable int id) {
         return appointmentService.deleteAppointment(id);

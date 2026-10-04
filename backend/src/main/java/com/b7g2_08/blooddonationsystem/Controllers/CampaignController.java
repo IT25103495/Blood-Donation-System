@@ -28,13 +28,13 @@ public class CampaignController {
     private CampaignService campaignService;
 
     // A hoster creates its own campaign; an admin creates one on behalf of a host (hosterID in the body).
-    @PreAuthorize("hasAnyRole('HOSTER','ADMIN')")
+    @PreAuthorize("hasAnyRole('HOSTER','SYSADMIN')")
     @PostMapping()
     public @ResponseBody String addNewCampaign(@Valid @RequestBody campaignCreateDTO campaign, @AuthenticationPrincipal AuthEntity me) {
         return campaignService.addNewCampaign(campaign, me);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('SYSADMIN')")
     @GetMapping()
     public @ResponseBody Iterable<Campaign> getAllCampaigns() {
         return campaignRepository.findAll();
@@ -58,7 +58,7 @@ public class CampaignController {
     }
 
     //update campaign status
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('SYSADMIN')")
     @PostMapping("/{id}/status")
     public @ResponseBody String updateStatus(@PathVariable int id, @Valid @RequestBody campaignUpdateStatusDTO status) {
         return campaignService.updateCampaignStatus(id, status);
@@ -66,27 +66,27 @@ public class CampaignController {
     }
 
     //assign venue to a campaign (admin or owning hoster)
-    @PreAuthorize("hasAnyRole('ADMIN','HOSTER')")
+    @PreAuthorize("hasAnyRole('SYSADMIN','HOSTER')")
     @PutMapping("/venue")
     public @ResponseBody String assignVenue(@RequestParam int campID, @RequestParam int venueID, @AuthenticationPrincipal AuthEntity me) {
         return campaignService.assignVenue(campID, venueID, me);
 
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('SYSADMIN')")
     @PutMapping("/{id}")
     public @ResponseBody String updateCampaign(@PathVariable int id, @Valid @RequestBody campaignUpdateDTO campaignUpdateDTO) {
         return campaignService.updateCampaign(id, campaignUpdateDTO);
 
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN','HOSTER')")
+    @PreAuthorize("hasAnyRole('SYSADMIN','HOSTER')")
     @GetMapping("/hoster/{hosterID}")
     public @ResponseBody Iterable<Campaign> getCampaignsByHoster(@PathVariable Integer hosterID, @AuthenticationPrincipal AuthEntity me) {
         return campaignService.getCampaignsByHoster(hosterID, me);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('SYSADMIN')")
     @DeleteMapping("/{id}")
     public @ResponseBody String deleteCampaign(@PathVariable Integer id) {
         return campaignService.deleteCampaign(id);
