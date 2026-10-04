@@ -12,23 +12,10 @@ import { Select } from '../../components/Select'
 import { Skeleton } from '../../components/Skeleton'
 import { StatusBadge } from '../../components/StatusBadge'
 import { useToast } from '../../context/ToastContext'
+import { hostName, venueIdsOf, venuesOf } from '../../utils/campaigns'
 import type { Bank, Campaign, Hoster, Venue } from '../../types/api'
 
 const today = () => new Date().toISOString().slice(0, 10)
-
-// A campaign's hoster arrives either as a full object or as a bare id, depending on whether Jackson
-// already serialised that hoster earlier in the same response. Accept both.
-function hostName(campaign: Campaign, hosters: Hoster[]) {
-  const raw = campaign.hoster as Hoster | number | null
-  if (raw && typeof raw === 'object') return raw.orgName
-  return hosters.find((hoster) => hoster.id === raw)?.orgName ?? 'Unknown host'
-}
-
-// Same story for the venues on a campaign: keep only the ids and read the details from the venue
-// list, so a venue edited on this page shows its new name straight away.
-function venueIdsOf(campaign: Campaign | null) {
-  return (campaign?.venueSet ?? []).map((entry) => (typeof entry === 'object' ? entry.venueID : (entry as number)))
-}
 
 function bankName(venue: Venue, banks: Bank[]) {
   return banks.find((bank) => bank.bankID === venue.assignedBank)?.name ?? `Bank ${venue.assignedBank}`
@@ -185,10 +172,7 @@ export function CampaignEditPage() {
   useEffect(load, [id])
 
   const venueIDs = useMemo(() => venueIdsOf(campaign), [campaign])
-  const campaignVenues = useMemo(
-    () => venueIDs.map((venueID) => venues.find((venue) => venue.venueID === venueID)).filter((venue): venue is Venue => Boolean(venue)),
-    [venueIDs, venues],
-  )
+  const campaignVenues = useMemo(() => venuesOf(campaign, venues), [campaign, venues])
 
   if (loading) return <LoadingPage />
   if (error || !campaign) return <div className="space-y-6">

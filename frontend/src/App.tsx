@@ -10,9 +10,10 @@ import { EligibilityPage } from './pages/EligibilityPage'
 import { HomePage } from './pages/HomePage'
 import { HosterPage } from './pages/hoster/HosterPage'
 import { HospitalPage } from './pages/hospital/HospitalPage'
-import { AdminsAdminPage, AppointmentsAdminPage, BanksAdminPage, HospitalsAdminPage, InventoryAdminPage, RequestsAdminPage, VenuesAdminPage } from './pages/admin/AdminDataPages'
+import { AppointmentsAdminPage, BanksAdminPage, InventoryAdminPage, RequestsAdminPage, VenuesAdminPage } from './pages/admin/AdminDataPages'
 import { AdminOverviewPage } from './pages/admin/AdminOverviewPage'
 import { CampaignEditPage, CampaignsAdminPage } from './pages/admin/CampaignsPage'
+import { UsersPage } from './pages/admin/UsersPage'
 import { CampaignApprovalsPage } from './pages/admin/CampaignApprovalsPage'
 import { RequestApprovalsPage } from './pages/admin/RequestApprovalsPage'
 import { StaffPage } from './pages/staff/StaffPage'
@@ -77,8 +78,10 @@ function AppRoutes() {
         <Route path="admin/banks" element={<BanksAdminPage />} />
         <Route path="admin/appointments" element={<AppointmentsAdminPage />} />
         <Route path="admin/inventory" element={<InventoryAdminPage />} />
-        <Route path="admin/hospitals" element={<HospitalsAdminPage />} />
-        <Route path="admin/admins" element={<AdminsAdminPage />} />
+        <Route path="admin/users" element={<UsersPage />} />
+        {/* Hospitals and admins are two tabs on the users page now; keep the old links working. */}
+        <Route path="admin/hospitals" element={<Navigate to="/admin/users" replace />} />
+        <Route path="admin/admins" element={<Navigate to="/admin/users" replace />} />
       </Route></Route>
       <Route element={<ProtectedRoute allowedRoles={['ADMIN', 'HOSPITAL']} />}><Route element={<Suspense fallback={<LayoutFallback />}><AppLayout /></Suspense>}>
         <Route path="appointments" element={<Placeholder title="Appointments" description="Manage donation appointments and upcoming campaigns." />} />

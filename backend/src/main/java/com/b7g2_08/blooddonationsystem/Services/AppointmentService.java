@@ -103,7 +103,12 @@ public class AppointmentService {
 
         Appointment appointment = appointmentRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Appointment Not Found!"));
 
-        if (appointment.getStatus() == appStatus.BOOKED && appointmentStatusUpdateDTO.getStatus() == appStatus.COMPLETE) {
+        // An appointment can only hold one unit, so a completed appointment that was reopened and
+        // completed again must not create a second one - that insert breaks the unique appID
+        // constraint and the whole status change fails with a conflict.
+        boolean alreadyCollected = inventoryRepository.findByAppointment_AppID(appointment.getAppID()).isPresent();
+
+        if (appointment.getStatus() == appStatus.BOOKED && appointmentStatusUpdateDTO.getStatus() == appStatus.COMPLETE && !alreadyCollected) {
             Inventory item = new Inventory();
             item.setStatus(itemStatus.AVAILABLE);
             item.setDateCollected(appointment.getDate());

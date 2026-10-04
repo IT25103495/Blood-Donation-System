@@ -12,9 +12,10 @@ export function mapAppointment(raw: AppointmentResponseRaw): Appointment {
     venue: raw.venue,
     donor: {
       donorID: raw.donor?.donorID,
-      firstName: raw.donor?.getfName ?? raw.donor?.fName ?? '',
-      lastName: raw.donor?.getlName ?? raw.donor?.lName ?? '',
+      firstName: raw.donor?.fName ?? '',
+      lastName: raw.donor?.lName ?? '',
       bloodType: raw.donor?.bloodType ?? '',
+      phone: raw.donor?.phoneNum ?? '',
     },
   };
 }

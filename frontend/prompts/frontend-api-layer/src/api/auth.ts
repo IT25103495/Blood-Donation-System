@@ -1,7 +1,13 @@
 import { api, toArray } from './client';
 import type {
-  AdminCreate, DonorCreate, Hospital, HospitalCreate, Hoster, HosterCreate, LoginRequest, TokenResponse, Admin,
+  AdminCreate, Donor, DonorCreate, DonorUpdate, Hospital, HospitalCreate, HospitalUpdate, Hoster, HosterCreate,
+  HosterUpdate, LoginRequest, TokenResponse, Admin, UserType, UserUpdate,
 } from '../types/api';
+
+/** User subclasses serialize their key as "ID"; the UI works with `id` everywhere. */
+function withId<T extends { id?: number; ID?: number }>(rows: T[]) {
+  return rows.map((row) => ({ ...row, id: row.id ?? row.ID ?? 0 }));
+}
 
 export const authApi = {
   async login(body: LoginRequest): Promise<TokenResponse> {
@@ -13,23 +19,17 @@ export const authApi = {
   registerHoster: (body: HosterCreate) => api.post<string>('/auth/register/hoster', body).then((r) => r.data),
   registerHospital: (body: HospitalCreate) => api.post<string>('/auth/register/hospital', body).then((r) => r.data),
   registerAdmin: (body: AdminCreate) => api.post<string>('/auth/register/admin', body).then((r) => r.data),
-  // Backend serializes the id as "ID" (capital), same as admins; normalize to `id`.
-  getHospitals: () => api.get('/auth/get/hospitalList').then((r) =>
-    toArray<Hospital & { ID?: number }>(r.data).map((hospital) => ({
-      ...hospital,
-      id: hospital.id ?? hospital.ID ?? 0,
-    })),
-  ),
-  getHosters: () => api.get('/auth/get/hosterList').then((r) =>
-    toArray<Hoster & { ID?: number }>(r.data).map((hoster) => ({
-      ...hoster,
-      id: hoster.id ?? hoster.ID ?? 0,
-    })),
-  ),
-  getAdmins: () => api.get('/auth/get/adminList').then((r) =>
-    toArray<Admin & { ID?: number }>(r.data).map((admin) => ({
-      ...admin,
-      id: admin.id ?? admin.ID ?? 0,
-    })),
-  ),
+  getHospitals: () => api.get('/auth/get/hospitalList').then((r) => withId(toArray<Hospital & { ID?: number }>(r.data))),
+  getHosters: () => api.get('/auth/get/hosterList').then((r) => withId(toArray<Hoster & { ID?: number }>(r.data))),
+  getAdmins: () => api.get('/auth/get/adminList').then((r) => withId(toArray<Admin & { ID?: number }>(r.data))),
+  getDonors: () => api.get('/auth/get/donorList').then((r) => withId(toArray<Donor & { ID?: number }>(r.data))),
+
+  // Partial edits: leave a field out (or empty) and the backend keeps its current value.
+  editDonor: (body: DonorUpdate) => api.put<string>('/auth/edit/donor', body).then((r) => r.data),
+  editHoster: (body: HosterUpdate) => api.put<string>('/auth/edit/hoster', body).then((r) => r.data),
+  editHospital: (body: HospitalUpdate) => api.put<string>('/auth/edit/hospital', body).then((r) => r.data),
+  editAdmin: (body: UserUpdate) => api.put<string>('/auth/edit/admin', body).then((r) => r.data),
+
+  deleteUser: (type: UserType, id: number) =>
+    api.delete<string>('/auth/delete/user', { params: { type, ID: id } }).then((r) => r.data),
 };
