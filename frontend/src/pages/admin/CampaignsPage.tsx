@@ -22,8 +22,8 @@ function bankName(venue: Venue, banks: Bank[]) {
   return banks.find((bank) => bank.bankID === venue.assignedBank)?.name ?? `Bank ${venue.assignedBank}`
 }
 
-function RowAction({ label, onClick, tone = 'neutral' }: { label: string; onClick: () => void; tone?: 'neutral' | 'danger' }) {
-  return <button type="button" onClick={onClick} className={`text-xs font-semibold ${tone === 'danger' ? 'text-red-700 hover:text-red-800' : 'text-slate-600 hover:text-slate-900'}`}>{label}</button>
+function RowAction({ label, onClick, tone = 'neutral', disabled, title }: { label: string; onClick: () => void; tone?: 'neutral' | 'danger'; disabled?: boolean; title?: string }) {
+  return <button type="button" onClick={onClick} disabled={disabled} title={title} className={`text-xs font-semibold disabled:cursor-not-allowed disabled:opacity-40 ${tone === 'danger' ? 'text-red-700 hover:text-red-800' : 'text-slate-600 hover:text-slate-900'}`}>{label}</button>
 }
 
 function LoadingPage() {
@@ -97,11 +97,13 @@ export function CampaignsAdminPage() {
   </div>
 }
 
-const CAMPAIGN_STEPS = ['Details', 'Schedule']
+const CAMPAIGN_STEPS = ['Details', 'Schedule', 'Venues']
 const CAMPAIGN_HEADINGS = [
   { title: 'Campaign details', description: 'What the campaign is called and who is running it.' },
   { title: 'Schedule', description: 'The window donors can book inside.' },
+  { title: 'Venues', description: 'Where donors can give blood. Pick at least one; you can change them later.' },
 ]
+const LAST_STEP = CAMPAIGN_STEPS.length - 1
 
 function CreateCampaignDialog({ open, hosters, onClose, onCreated }: { open: boolean; hosters: Hoster[]; onClose: () => void; onCreated: () => void }) {
   const { showToast } = useToast()
@@ -109,18 +111,34 @@ function CreateCampaignDialog({ open, hosters, onClose, onCreated }: { open: boo
   const [hosterID, setHosterID] = useState('')
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
+  const [venues, setVenues] = useState<Venue[]>([])
+  const [venueIDs, setVenueIDs] = useState<number[]>([])
+  const [venueSearch, setVenueSearch] = useState('')
   const [formError, setFormError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
   const [step, setStep] = useState(0)
 
-  // Start every dialog from a blank form rather than whatever the last attempt left behind.
-  useEffect(() => { if (open) { setStep(0); setName(''); setHosterID(''); setStartDate(''); setEndDate(''); setFormError(null) } }, [open])
+  // Start every dialog from a blank form rather than whatever the last attempt left behind. The
+  // venue list is only needed once the dialog is actually open, so it is fetched here.
+  useEffect(() => {
+    if (!open) return
+    setStep(0); setName(''); setHosterID(''); setStartDate(''); setEndDate(''); setVenueIDs([]); setVenueSearch(''); setFormError(null)
+    venuesApi.getAll().then(setVenues).catch((err: unknown) => setFormError(getErrorMessage(err)))
+  }, [open])
+
+  const matches = venues.filter((venue) => `${venue.name} ${venue.address}`.toLowerCase().includes(venueSearch.trim().toLowerCase()))
+  // Ticking a venue is what the "select at least one" error asks for, so clear it straight away
+  // rather than leaving a complaint on screen that the person has already acted on.
+  const toggleVenue = (venueID: number) => {
+    setFormError(null)
+    setVenueIDs((current) => current.includes(venueID) ? current.filter((id) => id !== venueID) : [...current, venueID])
+  }
 
   const create = async () => {
     setSaving(true)
     try {
-      await campaignsApi.create({ name: name.trim(), startDate, endDate, hosterID: Number(hosterID), venueIDs: [] })
-      showToast('Campaign created. Open it to add venues.')
+      await campaignsApi.create({ name: name.trim(), startDate, endDate, hosterID: Number(hosterID), venueIDs })
+      showToast(`Campaign created with ${venueIDs.length} venue${venueIDs.length === 1 ? '' : 's'}.`)
       onCreated()
     } catch (err: unknown) { setFormError(getErrorMessage(err)) }
     finally { setSaving(false) }
@@ -134,14 +152,18 @@ function CreateCampaignDialog({ open, hosters, onClose, onCreated }: { open: boo
       if (!hosterID) return setFormError('Choose the organization hosting this campaign.')
       return setStep(1)
     }
-    if (!startDate || !endDate) return setFormError('Choose a start and end date.')
-    if (startDate < today()) return setFormError('The campaign cannot start in the past.')
-    if (endDate < startDate) return setFormError('The end date must be on or after the start date.')
+    if (step === 1) {
+      if (!startDate || !endDate) return setFormError('Choose a start and end date.')
+      if (startDate < today()) return setFormError('The campaign cannot start in the past.')
+      if (endDate < startDate) return setFormError('The end date must be on or after the start date.')
+      return setStep(2)
+    }
+    if (venueIDs.length === 0) return setFormError('Select at least one venue for this campaign.')
     create()
   }
 
   const heading = CAMPAIGN_HEADINGS[step]
-  return <Modal open={open} title="Create campaign" description="Add the basics now; venues come next, from the campaign's own page." onClose={onClose}>
+  return <Modal open={open} title="Create campaign" description="Set up the campaign and pick where it runs." onClose={onClose}>
     <Stepper steps={CAMPAIGN_STEPS} current={step} onStepSelect={setStep} />
     <form onSubmit={(event) => { event.preventDefault(); advance() }} className="mt-6">
       <h3 className="font-semibold text-slate-900">{heading.title}</h3>
@@ -159,13 +181,28 @@ function CreateCampaignDialog({ open, hosters, onClose, onCreated }: { open: boo
           <Input label="Start date" id="create-campaign-start" type="date" min={today()} value={startDate} onChange={(event) => setStartDate(event.target.value)} />
           <Input label="End date" id="create-campaign-end" type="date" min={startDate || today()} value={endDate} onChange={(event) => setEndDate(event.target.value)} />
         </div>}
+        {step === 2 && <>
+          <input aria-label="Search venues" placeholder="Search venues" value={venueSearch} onChange={(event) => setVenueSearch(event.target.value)} className="w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm focus:border-red-700 focus:outline-none focus:ring-2 focus:ring-red-100" />
+          <div className="max-h-56 overflow-y-auto rounded-md border border-slate-200">
+            {matches.length === 0
+              ? <p className="p-4 text-sm text-slate-500">{venues.length === 0 ? <>No venues exist yet. <Link to="/admin/venues" className="font-semibold text-red-700 hover:text-red-800">Add one first</Link>, then come back.</> : 'No venues match that search.'}</p>
+              : matches.map((venue) => <label key={venue.venueID} className="flex cursor-pointer items-start gap-3 border-b border-slate-100 p-3 last:border-0 hover:bg-slate-50">
+                  <input type="checkbox" checked={venueIDs.includes(venue.venueID)} onChange={() => toggleVenue(venue.venueID)} className="mt-1 accent-red-700" />
+                  <span className="min-w-0">
+                    <span className="block text-sm font-medium text-slate-900">{venue.name}</span>
+                    <span className="block text-xs text-slate-500">{venue.address}</span>
+                  </span>
+                </label>)}
+          </div>
+          <p className="text-xs text-slate-500">{venueIDs.length === 0 ? 'At least one venue is required.' : `${venueIDs.length} venue${venueIDs.length === 1 ? '' : 's'} selected.`}</p>
+        </>}
       </div>
       <WizardNav
-        onPrevious={step === 0 ? onClose : () => setStep(0)}
+        onPrevious={step === 0 ? onClose : () => setStep(step - 1)}
         previousLabel={step === 0 ? 'Cancel' : 'Previous'}
         previousIcon={step > 0}
         onNext={advance}
-        nextLabel={step === 1 ? (saving ? 'Creating...' : 'Create campaign') : 'Next'}
+        nextLabel={step === LAST_STEP ? (saving ? 'Creating...' : 'Create campaign') : 'Next'}
         busy={saving}
       />
     </form>
@@ -277,7 +314,12 @@ function CampaignVenuesSection({ campaign, venueIDs, campaignVenues, venues, ban
   const [adding, setAdding] = useState(false)
   const [editingID, setEditingID] = useState<number | null>(null)
 
+  // A campaign has to run somewhere, so the last venue cannot be taken away - add the replacement
+  // first, then remove this one.
+  const isOnlyVenue = campaignVenues.length <= 1
+
   const remove = async (venue: Venue) => {
+    if (isOnlyVenue) return showToast('A campaign must keep at least one venue. Add another one first.', 'error')
     if (!window.confirm(`Remove "${venue.name}" from this campaign? The venue itself stays available for other campaigns.`)) return
     try {
       // The backend replaces the whole set, so send the venues that should remain.
@@ -313,7 +355,7 @@ function CampaignVenuesSection({ campaign, venueIDs, campaignVenues, venues, ban
             </div>
             <div className="flex shrink-0 gap-3">
               <RowAction label="Edit" onClick={() => { setEditingID(venue.venueID); setAdding(false) }} />
-              <RowAction label="Remove" tone="danger" onClick={() => remove(venue)} />
+              <RowAction label="Remove" tone="danger" disabled={isOnlyVenue} title={isOnlyVenue ? 'A campaign must keep at least one venue' : undefined} onClick={() => remove(venue)} />
             </div>
           </div>)}
     </div>

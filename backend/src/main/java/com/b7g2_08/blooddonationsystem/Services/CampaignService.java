@@ -38,7 +38,8 @@ public class CampaignService {
         Campaign campaign = new Campaign();
         Hoster hoster = resolveCreatingHoster(campaignCreateDTO, me);
         Set<Venue> venueSet = new HashSet<>();
-        // Venues are optional at creation time; they can be added to the campaign later.
+        // @NotEmpty on the DTO already guarantees at least one id; the check keeps this safe for any
+        // caller that reaches the service without going through request validation.
         if (campaignCreateDTO.getVenueIDs() != null) {
             for (Integer venueID : campaignCreateDTO.getVenueIDs()) {
                 Venue venue = venueRepository.findById(venueID)
@@ -111,6 +112,11 @@ public class CampaignService {
             campaign.setHoster(hoster);
         }
         if (campaignUpdateDTO.getVenueIDs() != null) {
+            // Leaving venueIDs out keeps the current venues; sending an empty set would strip them
+            // all, and a campaign with nowhere to donate is not a campaign.
+            if (campaignUpdateDTO.getVenueIDs().isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A campaign must keep at least one venue.");
+            }
             Set<Venue> venueSet = new HashSet<>();
             for (Integer venueID : campaignUpdateDTO.getVenueIDs()) {
                 Venue venue = venueRepository.findById(venueID)
