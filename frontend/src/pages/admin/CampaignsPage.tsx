@@ -11,6 +11,7 @@ import { Modal } from '../../components/Modal'
 import { Select } from '../../components/Select'
 import { Skeleton } from '../../components/Skeleton'
 import { StatusBadge } from '../../components/StatusBadge'
+import { Stepper, WizardNav } from '../../components/Stepper'
 import { useToast } from '../../context/ToastContext'
 import { hostName, venueIdsOf, venuesOf } from '../../utils/campaigns'
 import type { Bank, Campaign, Hoster, Venue } from '../../types/api'
@@ -96,6 +97,12 @@ export function CampaignsAdminPage() {
   </div>
 }
 
+const CAMPAIGN_STEPS = ['Details', 'Schedule']
+const CAMPAIGN_HEADINGS = [
+  { title: 'Campaign details', description: 'What the campaign is called and who is running it.' },
+  { title: 'Schedule', description: 'The window donors can book inside.' },
+]
+
 function CreateCampaignDialog({ open, hosters, onClose, onCreated }: { open: boolean; hosters: Hoster[]; onClose: () => void; onCreated: () => void }) {
   const { showToast } = useToast()
   const [name, setName] = useState('')
@@ -104,18 +111,12 @@ function CreateCampaignDialog({ open, hosters, onClose, onCreated }: { open: boo
   const [endDate, setEndDate] = useState('')
   const [formError, setFormError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
+  const [step, setStep] = useState(0)
 
   // Start every dialog from a blank form rather than whatever the last attempt left behind.
-  useEffect(() => { if (open) { setName(''); setHosterID(''); setStartDate(''); setEndDate(''); setFormError(null) } }, [open])
+  useEffect(() => { if (open) { setStep(0); setName(''); setHosterID(''); setStartDate(''); setEndDate(''); setFormError(null) } }, [open])
 
-  const submit = async (event: React.FormEvent) => {
-    event.preventDefault()
-    setFormError(null)
-    if (!name.trim()) return setFormError('Enter a campaign name.')
-    if (!hosterID) return setFormError('Choose the organization hosting this campaign.')
-    if (!startDate || !endDate) return setFormError('Choose a start and end date.')
-    if (startDate < today()) return setFormError('The campaign cannot start in the past.')
-    if (endDate < startDate) return setFormError('The end date must be on or after the start date.')
+  const create = async () => {
     setSaving(true)
     try {
       await campaignsApi.create({ name: name.trim(), startDate, endDate, hosterID: Number(hosterID), venueIDs: [] })
@@ -125,22 +126,48 @@ function CreateCampaignDialog({ open, hosters, onClose, onCreated }: { open: boo
     finally { setSaving(false) }
   }
 
+  // Each step checks only its own fields, so you are never told off about a question further on.
+  const advance = () => {
+    setFormError(null)
+    if (step === 0) {
+      if (!name.trim()) return setFormError('Enter a campaign name.')
+      if (!hosterID) return setFormError('Choose the organization hosting this campaign.')
+      return setStep(1)
+    }
+    if (!startDate || !endDate) return setFormError('Choose a start and end date.')
+    if (startDate < today()) return setFormError('The campaign cannot start in the past.')
+    if (endDate < startDate) return setFormError('The end date must be on or after the start date.')
+    create()
+  }
+
+  const heading = CAMPAIGN_HEADINGS[step]
   return <Modal open={open} title="Create campaign" description="Add the basics now; venues come next, from the campaign's own page." onClose={onClose}>
-    <form onSubmit={submit} className="space-y-4">
-      {formError && <div role="alert" className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-800">{formError}</div>}
-      <Input label="Campaign name" id="create-campaign-name" value={name} onChange={(event) => setName(event.target.value)} />
-      <Select label="Host" id="create-campaign-host" value={hosterID} onChange={(event) => setHosterID(event.target.value)}>
-        <option value="">Select a host</option>
-        {hosters.map((hoster) => <option key={hoster.id} value={hoster.id}>{hoster.orgName}</option>)}
-      </Select>
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Input label="Start date" id="create-campaign-start" type="date" min={today()} value={startDate} onChange={(event) => setStartDate(event.target.value)} />
-        <Input label="End date" id="create-campaign-end" type="date" min={startDate || today()} value={endDate} onChange={(event) => setEndDate(event.target.value)} />
+    <Stepper steps={CAMPAIGN_STEPS} current={step} onStepSelect={setStep} />
+    <form onSubmit={(event) => { event.preventDefault(); advance() }} className="mt-6">
+      <h3 className="font-semibold text-slate-900">{heading.title}</h3>
+      <p className="mt-1 text-sm text-slate-500">{heading.description}</p>
+      <div className="mt-4 space-y-4">
+        {formError && <div role="alert" className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-800">{formError}</div>}
+        {step === 0 && <>
+          <Input label="Campaign name" id="create-campaign-name" value={name} onChange={(event) => setName(event.target.value)} />
+          <Select label="Host" id="create-campaign-host" value={hosterID} onChange={(event) => setHosterID(event.target.value)}>
+            <option value="">Select a host</option>
+            {hosters.map((hoster) => <option key={hoster.id} value={hoster.id}>{hoster.orgName}</option>)}
+          </Select>
+        </>}
+        {step === 1 && <div className="grid gap-4 sm:grid-cols-2">
+          <Input label="Start date" id="create-campaign-start" type="date" min={today()} value={startDate} onChange={(event) => setStartDate(event.target.value)} />
+          <Input label="End date" id="create-campaign-end" type="date" min={startDate || today()} value={endDate} onChange={(event) => setEndDate(event.target.value)} />
+        </div>}
       </div>
-      <div className="flex justify-end gap-2 pt-1">
-        <Button type="button" className="bg-slate-600 hover:bg-slate-700" onClick={onClose}>Cancel</Button>
-        <Button type="submit" disabled={saving}>{saving ? 'Creating...' : 'Create campaign'}</Button>
-      </div>
+      <WizardNav
+        onPrevious={step === 0 ? onClose : () => setStep(0)}
+        previousLabel={step === 0 ? 'Cancel' : 'Previous'}
+        previousIcon={step > 0}
+        onNext={advance}
+        nextLabel={step === 1 ? (saving ? 'Creating...' : 'Create campaign') : 'Next'}
+        busy={saving}
+      />
     </form>
   </Modal>
 }

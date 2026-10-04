@@ -8,6 +8,7 @@ import { Input } from '../../components/Input'
 import { Modal } from '../../components/Modal'
 import { Select } from '../../components/Select'
 import { Skeleton } from '../../components/Skeleton'
+import { Stepper, WizardNav } from '../../components/Stepper'
 import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../../context/ToastContext'
 import { BLOOD_TYPES } from '../../utils/constants'
@@ -133,22 +134,26 @@ export function UsersPage() {
 type AccountFields = { username: string; email: string; password: string; phoneNum: string; firstName: string; lastName: string; nic: string; bloodType: string; dob: string; orgName: string; hospitalName: string; address: string; adminRole: AdminType }
 const blankAccount: AccountFields = { username: '', email: '', password: '', phoneNum: '', firstName: '', lastName: '', nic: '', bloodType: '', dob: '', orgName: '', hospitalName: '', address: '', adminRole: 'DOCTOR' }
 
+const USER_STEPS = ['Details', 'Login']
+// What step one is called depends on what kind of account is being added.
+const DETAIL_HEADINGS: Record<UserType, { title: string; description: string }> = {
+  DONOR: { title: 'Donor details', description: 'Who the donor is, and what they can give.' },
+  HOSTER: { title: 'Organization', description: 'The organization that will run campaigns.' },
+  HOSPITAL: { title: 'Hospital', description: 'The hospital that will request blood.' },
+  ADMIN: { title: 'Role', description: 'What this administrator is allowed to do.' },
+}
+
 function CreateUserDialog({ open, type, onClose, onCreated }: { open: boolean; type: UserType; onClose: () => void; onCreated: () => void }) {
   const { showToast } = useToast()
   const [form, setForm] = useState<AccountFields>(blankAccount)
   const [formError, setFormError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
+  const [step, setStep] = useState(0)
   const set = (key: keyof AccountFields) => (event: { target: { value: string } }) => setForm((current) => ({ ...current, [key]: event.target.value }))
 
-  useEffect(() => { if (open) { setForm(blankAccount); setFormError(null) } }, [open, type])
+  useEffect(() => { if (open) { setStep(0); setForm(blankAccount); setFormError(null) } }, [open, type])
 
-  const submit = async (event: React.FormEvent) => {
-    event.preventDefault()
-    setFormError(null)
-    if (!form.username.trim() || !form.password || !form.email.trim() || !form.phoneNum.trim()) return setFormError('Username, email, phone, and password are all required.')
-    if (type === 'DONOR' && (!form.firstName.trim() || !form.lastName.trim() || !form.nic.trim() || !form.bloodType || !form.dob)) return setFormError('Fill in the donor name, NIC, blood type, and date of birth.')
-    if (type === 'HOSTER' && !form.orgName.trim()) return setFormError('Enter the organization name.')
-    if (type === 'HOSPITAL' && (!form.hospitalName.trim() || !form.address.trim())) return setFormError('Enter the hospital name and address.')
+  const create = async () => {
     const common = { email: form.email.trim(), phoneNum: form.phoneNum.trim(), username: form.username.trim(), password: form.password }
     setSaving(true)
     try {
@@ -162,41 +167,68 @@ function CreateUserDialog({ open, type, onClose, onCreated }: { open: boolean; t
     finally { setSaving(false) }
   }
 
+  // Step one validates only what that account type needs; the login fields are checked on step two.
+  const advance = () => {
+    setFormError(null)
+    if (step === 0) {
+      if (type === 'DONOR' && (!form.firstName.trim() || !form.lastName.trim() || !form.nic.trim() || !form.bloodType || !form.dob)) return setFormError('Fill in the donor name, NIC, blood type, and date of birth.')
+      if (type === 'HOSTER' && !form.orgName.trim()) return setFormError('Enter the organization name.')
+      if (type === 'HOSPITAL' && (!form.hospitalName.trim() || !form.address.trim())) return setFormError('Enter the hospital name and address.')
+      return setStep(1)
+    }
+    if (!form.username.trim() || !form.password || !form.email.trim() || !form.phoneNum.trim()) return setFormError('Username, email, phone, and password are all required.')
+    create()
+  }
+
+  const heading = step === 0 ? DETAIL_HEADINGS[type] : { title: 'Login details', description: 'How this account will sign in.' }
   return <Modal open={open} title={`Add ${SINGULAR[type]}`} description="The account can sign in as soon as it is created." onClose={onClose}>
-    <form onSubmit={submit} className="space-y-4">
-      {formError && <div role="alert" className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-800">{formError}</div>}
-      {type === 'DONOR' && <>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Input label="First name" id="new-first-name" value={form.firstName} onChange={set('firstName')} />
-          <Input label="Last name" id="new-last-name" value={form.lastName} onChange={set('lastName')} />
-        </div>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Input label="NIC" id="new-nic" value={form.nic} onChange={set('nic')} />
-          <Select label="Blood type" id="new-blood-type" value={form.bloodType} onChange={set('bloodType')}>
-            <option value="">Select type</option>
-            {BLOOD_TYPES.map((item) => <option key={item}>{item}</option>)}
-          </Select>
-        </div>
-        <Input label="Date of birth" id="new-dob" type="date" value={form.dob} onChange={set('dob')} />
-      </>}
-      {type === 'HOSTER' && <Input label="Organization" id="new-org-name" value={form.orgName} onChange={set('orgName')} />}
-      {type === 'HOSPITAL' && <>
-        <Input label="Hospital name" id="new-hospital-name" value={form.hospitalName} onChange={set('hospitalName')} />
-        <Input label="Address" id="new-hospital-address" value={form.address} onChange={set('address')} />
-      </>}
-      {type === 'ADMIN' && <Select label="Role" id="new-admin-role" value={form.adminRole} onChange={set('adminRole')}>{ADMIN_TYPES.map((item) => <option key={item}>{item}</option>)}</Select>}
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Input label="Email" id="new-email" type="email" value={form.email} onChange={set('email')} />
-        <Input label="Phone" id="new-phone" value={form.phoneNum} onChange={set('phoneNum')} />
+    <Stepper steps={USER_STEPS} current={step} onStepSelect={setStep} />
+    <form onSubmit={(event) => { event.preventDefault(); advance() }} className="mt-6">
+      <h3 className="font-semibold text-slate-900">{heading.title}</h3>
+      <p className="mt-1 text-sm text-slate-500">{heading.description}</p>
+      <div className="mt-4 space-y-4">
+        {formError && <div role="alert" className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-800">{formError}</div>}
+        {step === 0 && <>
+          {type === 'DONOR' && <>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Input label="First name" id="new-first-name" value={form.firstName} onChange={set('firstName')} />
+              <Input label="Last name" id="new-last-name" value={form.lastName} onChange={set('lastName')} />
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Input label="NIC" id="new-nic" value={form.nic} onChange={set('nic')} />
+              <Select label="Blood type" id="new-blood-type" value={form.bloodType} onChange={set('bloodType')}>
+                <option value="">Select type</option>
+                {BLOOD_TYPES.map((item) => <option key={item}>{item}</option>)}
+              </Select>
+            </div>
+            <Input label="Date of birth" id="new-dob" type="date" value={form.dob} onChange={set('dob')} />
+          </>}
+          {type === 'HOSTER' && <Input label="Organization" id="new-org-name" value={form.orgName} onChange={set('orgName')} />}
+          {type === 'HOSPITAL' && <>
+            <Input label="Hospital name" id="new-hospital-name" value={form.hospitalName} onChange={set('hospitalName')} />
+            <Input label="Address" id="new-hospital-address" value={form.address} onChange={set('address')} />
+          </>}
+          {type === 'ADMIN' && <Select label="Role" id="new-admin-role" value={form.adminRole} onChange={set('adminRole')}>{ADMIN_TYPES.map((item) => <option key={item}>{item}</option>)}</Select>}
+        </>}
+        {step === 1 && <>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Input label="Email" id="new-email" type="email" value={form.email} onChange={set('email')} />
+            <Input label="Phone" id="new-phone" value={form.phoneNum} onChange={set('phoneNum')} />
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Input label="Username" id="new-username" value={form.username} onChange={set('username')} />
+            <Input label="Password" id="new-password" type="password" value={form.password} onChange={set('password')} />
+          </div>
+        </>}
       </div>
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Input label="Username" id="new-username" value={form.username} onChange={set('username')} />
-        <Input label="Password" id="new-password" type="password" value={form.password} onChange={set('password')} />
-      </div>
-      <div className="flex justify-end gap-2 pt-1">
-        <Button type="button" className="bg-slate-600 hover:bg-slate-700" onClick={onClose}>Cancel</Button>
-        <Button type="submit" disabled={saving}>{saving ? 'Creating...' : 'Create account'}</Button>
-      </div>
+      <WizardNav
+        onPrevious={step === 0 ? onClose : () => setStep(0)}
+        previousLabel={step === 0 ? 'Cancel' : 'Previous'}
+        previousIcon={step > 0}
+        onNext={advance}
+        nextLabel={step === 1 ? (saving ? 'Creating...' : 'Create account') : 'Next'}
+        busy={saving}
+      />
     </form>
   </Modal>
 }
