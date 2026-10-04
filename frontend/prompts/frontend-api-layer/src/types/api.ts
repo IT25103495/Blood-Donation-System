@@ -40,6 +40,27 @@ export interface Donor {
 /** The four kinds of account, as /auth/delete/user and /auth/get/user expect them. */
 export type UserType = 'DONOR' | 'HOSTER' | 'HOSPITAL' | 'ADMIN';
 
+/**
+ * The signed-in account, from /auth/get/me. The endpoint returns whichever user type the token
+ * belongs to, so everything past the shared fields depends on the role. Email is deliberately
+ * absent: it lives on the auth record and the backend does not serialise it here.
+ */
+export interface Me {
+  id: number;
+  username: string;
+  email: string;
+  phoneNum: string;
+  f_Name?: string;
+  l_Name?: string;
+  nic?: string;
+  bloodType?: string;
+  dob?: ISODate;
+  orgName?: string;
+  hospitalName?: string;
+  address?: string;
+  type?: AdminType;
+}
+
 export interface Hospital {
   id: number;
   username: string;

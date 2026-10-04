@@ -6,6 +6,7 @@ import { AppointmentsPage } from './pages/donor/AppointmentsPage'
 import { BookAppointmentPage } from './pages/donor/BookAppointmentPage'
 import { ComingSoonPage } from './pages/donor/ComingSoonPage'
 import { DonorDashboardPage } from './pages/donor/DonorDashboardPage'
+import { AccountPage } from './pages/AccountPage'
 import { EligibilityPage } from './pages/EligibilityPage'
 import { HomePage } from './pages/HomePage'
 import { HosterPage } from './pages/hoster/HosterPage'
@@ -22,7 +23,7 @@ import { StaffPage } from './pages/staff/StaffPage'
 import { LoginPage } from './pages/LoginPage'
 import { RegisterPage } from './pages/RegisterPage'
 import { ForbiddenPage, NotFoundPage } from './pages/StatusPages'
-import { ProtectedRoute, PublicOnlyRoute, dashboardFor } from './routes/ProtectedRoute'
+import { ProtectedRoute, PublicOnlyRoute, dashboardFor, profileFor } from './routes/ProtectedRoute'
 import './App.css'
 
 const AppLayout = lazy(() => import('./layouts/AppLayout').then((module) => ({ default: module.AppLayout })))
@@ -33,6 +34,7 @@ const PageContainer = lazy(() => import('./layouts/PageContainer').then((module)
 const Placeholder = ({ title, description }: { title: string; description: string }) => <section className="space-y-2"><p className="eyebrow">Blood donation system</p><h1 className="text-3xl font-semibold tracking-tight text-slate-950">{title}</h1><p className="max-w-xl text-slate-600">{description}</p></section>
 function BookRedirect() { const { role } = useAuth(); return <Navigate to={role === 'DONOR' ? '/donor/book' : '/login'} replace /> }
 function DashboardRedirect() { const { role, adminType } = useAuth(); return role ? <Navigate to={dashboardFor(role, adminType)} replace /> : <Navigate to="/login" replace /> }
+function ProfileRedirect() { const { role, adminType } = useAuth(); return role ? <Navigate to={profileFor(role, adminType)} replace /> : <Navigate to="/login" replace /> }
 const LayoutFallback = () => <div className="min-h-screen bg-slate-50 p-8"><div className="mx-auto h-10 max-w-6xl animate-pulse rounded bg-slate-200" /></div>
 
 function AppRoutes() {
@@ -56,21 +58,27 @@ function AppRoutes() {
           <Route path="donor" element={<DonorDashboardPage />} />
           <Route path="donor/book" element={<BookAppointmentPage />} />
           <Route path="donor/appointments" element={<AppointmentsPage />} />
-          <Route path="donor/profile" element={<ComingSoonPage title="Profile" />} />
+          <Route path="donor/profile" element={<AccountPage />} />
           <Route path="donor/password" element={<ComingSoonPage title="Change password" />} />
         </Route>
       </Route>
       <Route element={<ProtectedRoute allowedRoles={['HOSTER']} />}>
         <Route element={<Suspense fallback={<LayoutFallback />}><PageContainer /></Suspense>}>
           <Route path="hoster" element={<HosterPage />} />
+          <Route path="hoster/profile" element={<AccountPage />} />
         </Route>
+      </Route>
+
+      {/* The profile now lives inside each role's own section; this keeps older links working. */}
+      <Route element={<ProtectedRoute />}>
+        <Route path="account" element={<ProfileRedirect />} />
       </Route>
     </Route>
 
     <Route element={<ProtectedRoute />}>
       <Route path="dashboard" element={<DashboardRedirect />} />
-      <Route element={<ProtectedRoute allowedRoles={['HOSPITAL']} />}><Route element={<Suspense fallback={<LayoutFallback />}><AppLayout /></Suspense>}><Route path="hospital" element={<HospitalPage />} /></Route></Route>
-      <Route element={<ProtectedRoute allowedRoles={['ADMIN']} allowedAdminTypes={['DOCTOR']} />}><Route element={<Suspense fallback={<LayoutFallback />}><AppLayout /></Suspense>}><Route path="staff" element={<StaffPage />} /></Route></Route>
+      <Route element={<ProtectedRoute allowedRoles={['HOSPITAL']} />}><Route element={<Suspense fallback={<LayoutFallback />}><AppLayout /></Suspense>}><Route path="hospital" element={<HospitalPage />} /><Route path="hospital/profile" element={<AccountPage />} /></Route></Route>
+      <Route element={<ProtectedRoute allowedRoles={['ADMIN']} allowedAdminTypes={['DOCTOR']} />}><Route element={<Suspense fallback={<LayoutFallback />}><AppLayout /></Suspense>}><Route path="staff" element={<StaffPage />} /><Route path="staff/profile" element={<AccountPage />} /></Route></Route>
       <Route element={<ProtectedRoute allowedRoles={['ADMIN']} allowedAdminTypes={['MANAGER', 'SYSADMIN']} />}><Route element={<Suspense fallback={<LayoutFallback />}><AdminLayout /></Suspense>}>
         <Route path="admin" element={<AdminOverviewPage />} />
         {/* A manager handles blood requests and the stock behind them. */}
@@ -79,6 +87,8 @@ function AppRoutes() {
         <Route path="admin/banks" element={<BanksAdminPage />} />
         <Route path="admin/banks/:bankID" element={<BankEditPage />} />
         <Route path="admin/inventory" element={<InventoryAdminPage />} />
+        {/* Every admin can see their own profile, manager included. */}
+        <Route path="admin/profile" element={<AccountPage />} />
         {/* Everything else is the sysadmin's; the backend turns a manager away from these too. */}
         <Route element={<ProtectedRoute allowedRoles={['ADMIN']} allowedAdminTypes={['SYSADMIN']} />}>
           <Route path="admin/approvals/campaigns" element={<CampaignApprovalsPage />} />

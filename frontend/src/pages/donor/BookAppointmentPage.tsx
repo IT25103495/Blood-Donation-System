@@ -116,7 +116,7 @@ export function BookAppointmentPage() {
                   <span className="font-semibold text-slate-950">{item.name}</span>
                   <StatusBadge status={item.status} />
                 </div>
-                <p className="mt-2 text-sm text-slate-600">{item.startDate} to {item.endDate} · {venuesOf(item, venues).length} venues</p>
+                <p className="mt-2 text-sm text-slate-600">{item.startDate} to {item.endDate} · {venuesOf(item, venues).length} venue{venuesOf(item, venues).length === 1 ? '' : 's'}</p>
               </button>)}
         </div>}
 

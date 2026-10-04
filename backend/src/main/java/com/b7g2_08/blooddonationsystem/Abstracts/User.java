@@ -52,6 +52,13 @@ public abstract class User {
         return authEntity != null ? authEntity.getUsername() : null;
     }
 
+    // Lifted off the auth record the same way the username is, so a user can see and edit the email
+    // on their own profile instead of being shown a blank field they cannot verify.
+    @JsonProperty("email")
+    public String getEmail() {
+        return authEntity != null ? authEntity.getEmail() : null;
+    }
+
     public void setID(Integer ID) {
         this.ID = ID;
     }

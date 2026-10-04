@@ -7,6 +7,7 @@ import com.b7g2_08.blooddonationsystem.DTOs.Appointment.appointmentUpdateDTO;
 import com.b7g2_08.blooddonationsystem.Enums.appStatus;
 import com.b7g2_08.blooddonationsystem.Enums.itemStatus;
 import com.b7g2_08.blooddonationsystem.Models.Appointment;
+import com.b7g2_08.blooddonationsystem.Models.AuthEntity;
 import com.b7g2_08.blooddonationsystem.Models.Campaign;
 import com.b7g2_08.blooddonationsystem.Models.Inventory;
 import com.b7g2_08.blooddonationsystem.Models.Users.Donor;
@@ -123,6 +124,27 @@ public class AppointmentService {
         appointment.setStatus(appointmentStatusUpdateDTO.getStatus());
         appointmentRepository.save(appointment);
         return returnStr;
+    }
+
+    // A donor may call off their own booking and nothing else. Kept separate from the admin status
+    // endpoint so cancelling is the only outcome they can reach - marking a donation COMPLETE
+    // creates an inventory unit and has to stay with staff.
+    @Transactional
+    public @ResponseBody String cancelOwnAppointment(int id, AuthEntity me) {
+        Appointment appointment = appointmentRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Appointment Not Found!"));
+
+        Donor donor = me.getDonor();
+        if (donor == null || appointment.getDonor() == null || !appointment.getDonor().getID().equals(donor.getID())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not your appointment");
+        }
+        if (appointment.getStatus() != appStatus.BOOKED) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only a booked appointment can be cancelled.");
+        }
+
+        appointment.setStatus(appStatus.CANCELLED);
+        appointmentRepository.save(appointment);
+        return "Appointment cancelled";
     }
 
     @Transactional

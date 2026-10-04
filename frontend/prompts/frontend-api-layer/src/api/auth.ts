@@ -1,7 +1,7 @@
 import { api, toArray } from './client';
 import type {
   AdminCreate, Donor, DonorCreate, DonorUpdate, Hospital, HospitalCreate, HospitalUpdate, Hoster, HosterCreate,
-  HosterUpdate, LoginRequest, TokenResponse, Admin, UserType, UserUpdate,
+  HosterUpdate, LoginRequest, Me, TokenResponse, Admin, UserType, UserUpdate,
 } from '../types/api';
 
 /** User subclasses serialize their key as "ID"; the UI works with `id` everywhere. */
@@ -30,6 +30,10 @@ export const authApi = {
   editHospital: (body: HospitalUpdate) => api.put<string>('/auth/edit/hospital', body).then((r) => r.data),
   editAdmin: (body: UserUpdate) => api.put<string>('/auth/edit/admin', body).then((r) => r.data),
 
+  /** The signed-in account, whatever role the token belongs to. */
+  getMe: () => api.get<Me & { ID?: number }>('/auth/get/me').then((r) => ({ ...r.data, id: r.data.id ?? r.data.ID ?? 0 })),
+
   deleteUser: (type: UserType, id: number) =>
     api.delete<string>('/auth/delete/user', { params: { type, ID: id } }).then((r) => r.data),
 };
+
