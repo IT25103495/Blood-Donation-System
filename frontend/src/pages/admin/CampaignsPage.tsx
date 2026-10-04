@@ -4,7 +4,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { authApi, bloodBanksApi, campaignsApi, getErrorMessage, venuesApi } from '../../api'
 import { Button } from '../../components/Button'
 import { Card } from '../../components/Card'
-import { DataTable, type TableColumn } from '../../components/DataTable'
+import { DataTable, rowActionClass, type TableColumn } from '../../components/DataTable'
 import { ErrorState } from '../../components/ErrorState'
 import { Input } from '../../components/Input'
 import { Modal } from '../../components/Modal'
@@ -40,7 +40,7 @@ function StatusSelect({ campaign, onChange }: { campaign: Campaign; onChange: (s
 }
 
 function RowAction({ label, onClick, tone = 'neutral', disabled, title }: { label: string; onClick: () => void; tone?: 'neutral' | 'danger'; disabled?: boolean; title?: string }) {
-  return <button type="button" onClick={onClick} disabled={disabled} title={title} className={`text-xs font-semibold disabled:cursor-not-allowed disabled:opacity-40 ${tone === 'danger' ? 'text-red-700 hover:text-red-800' : 'text-slate-600 hover:text-slate-900'}`}>{label}</button>
+  return <button type="button" onClick={onClick} disabled={disabled} title={title} className={`${rowActionClass} ${tone === 'danger' ? 'text-red-700 hover:text-red-800' : 'text-slate-600 hover:text-slate-900'}`}>{label}</button>
 }
 
 function LoadingPage() {

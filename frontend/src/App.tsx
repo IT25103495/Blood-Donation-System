@@ -10,7 +10,9 @@ import { EligibilityPage } from './pages/EligibilityPage'
 import { HomePage } from './pages/HomePage'
 import { HosterPage } from './pages/hoster/HosterPage'
 import { HospitalPage } from './pages/hospital/HospitalPage'
-import { AppointmentsAdminPage, BanksAdminPage, InventoryAdminPage, RequestsAdminPage, VenuesAdminPage } from './pages/admin/AdminDataPages'
+import { AppointmentsAdminPage, InventoryAdminPage, RequestsAdminPage } from './pages/admin/AdminDataPages'
+import { BankEditPage, BanksAdminPage } from './pages/admin/BanksPage'
+import { VenueEditPage, VenuesAdminPage } from './pages/admin/VenuesPage'
 import { AdminOverviewPage } from './pages/admin/AdminOverviewPage'
 import { CampaignEditPage, CampaignsAdminPage } from './pages/admin/CampaignsPage'
 import { UsersPage } from './pages/admin/UsersPage'
@@ -35,13 +37,15 @@ const LayoutFallback = () => <div className="min-h-screen bg-slate-50 p-8"><div 
 
 function AppRoutes() {
   return <BrowserRouter><Routes>
+    {/* Sign-in and registration bring their own full-page layout, so they sit outside the site chrome. */}
+    <Route element={<PublicOnlyRoute />}>
+      <Route path="login" element={<LoginPage />} />
+      <Route path="register" element={<RegisterPage />} />
+    </Route>
+
     <Route element={<Suspense fallback={<LayoutFallback />}><PublicLayout /></Suspense>}>
       <Route index element={<HomePage />} />
       <Route path="eligibility" element={<EligibilityPage />} />
-      <Route element={<PublicOnlyRoute />}>
-        <Route path="login" element={<LoginPage />} />
-        <Route path="register" element={<RegisterPage />} />
-      </Route>
       <Route path="book" element={<BookRedirect />} />
       <Route path="403" element={<ForbiddenPage />} />
       <Route path="404" element={<NotFoundPage />} />
@@ -73,6 +77,7 @@ function AppRoutes() {
         <Route path="admin/approvals/requests" element={<RequestApprovalsPage />} />
         <Route path="admin/requests" element={<RequestsAdminPage />} />
         <Route path="admin/banks" element={<BanksAdminPage />} />
+        <Route path="admin/banks/:bankID" element={<BankEditPage />} />
         <Route path="admin/inventory" element={<InventoryAdminPage />} />
         {/* Everything else is the sysadmin's; the backend turns a manager away from these too. */}
         <Route element={<ProtectedRoute allowedRoles={['ADMIN']} allowedAdminTypes={['SYSADMIN']} />}>
@@ -80,6 +85,7 @@ function AppRoutes() {
           <Route path="admin/campaigns" element={<CampaignsAdminPage />} />
           <Route path="admin/campaigns/:campID" element={<CampaignEditPage />} />
           <Route path="admin/venues" element={<VenuesAdminPage />} />
+          <Route path="admin/venues/:venueID" element={<VenueEditPage />} />
           <Route path="admin/appointments" element={<AppointmentsAdminPage />} />
           <Route path="admin/users" element={<UsersPage />} />
           {/* Hospitals and admins are two tabs on the users page now; keep the old links working. */}
