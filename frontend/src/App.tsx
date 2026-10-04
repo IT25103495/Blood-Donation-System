@@ -10,8 +10,9 @@ import { EligibilityPage } from './pages/EligibilityPage'
 import { HomePage } from './pages/HomePage'
 import { HosterPage } from './pages/hoster/HosterPage'
 import { HospitalPage } from './pages/hospital/HospitalPage'
-import { AdminsAdminPage, AppointmentsAdminPage, BanksAdminPage, CampaignsAdminPage, HospitalsAdminPage, InventoryAdminPage, RequestsAdminPage, VenuesAdminPage } from './pages/admin/AdminDataPages'
+import { AdminsAdminPage, AppointmentsAdminPage, BanksAdminPage, HospitalsAdminPage, InventoryAdminPage, RequestsAdminPage, VenuesAdminPage } from './pages/admin/AdminDataPages'
 import { AdminOverviewPage } from './pages/admin/AdminOverviewPage'
+import { CampaignEditPage, CampaignsAdminPage } from './pages/admin/CampaignsPage'
 import { CampaignApprovalsPage } from './pages/admin/CampaignApprovalsPage'
 import { RequestApprovalsPage } from './pages/admin/RequestApprovalsPage'
 import { StaffPage } from './pages/staff/StaffPage'
@@ -70,6 +71,7 @@ function AppRoutes() {
         <Route path="admin/approvals/campaigns" element={<CampaignApprovalsPage />} />
         <Route path="admin/approvals/requests" element={<RequestApprovalsPage />} />
         <Route path="admin/campaigns" element={<CampaignsAdminPage />} />
+        <Route path="admin/campaigns/:campID" element={<CampaignEditPage />} />
         <Route path="admin/requests" element={<RequestsAdminPage />} />
         <Route path="admin/venues" element={<VenuesAdminPage />} />
         <Route path="admin/banks" element={<BanksAdminPage />} />

@@ -36,15 +36,15 @@ public class CampaignService {
     public @ResponseBody String addNewCampaign(campaignCreateDTO campaignCreateDTO, AuthEntity me) {
 
         Campaign campaign = new Campaign();
-        Hoster hoster = me.getHoster();
-        if (hoster == null) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only hosters can create campaigns");
-        }
+        Hoster hoster = resolveCreatingHoster(campaignCreateDTO, me);
         Set<Venue> venueSet = new HashSet<>();
-        for (Integer venueID : campaignCreateDTO.getVenueIDs()) {
-            Venue venue = venueRepository.findById(venueID)
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Venue Not Found: " + venueID));
-            venueSet.add(venue);
+        // Venues are optional at creation time; they can be added to the campaign later.
+        if (campaignCreateDTO.getVenueIDs() != null) {
+            for (Integer venueID : campaignCreateDTO.getVenueIDs()) {
+                Venue venue = venueRepository.findById(venueID)
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Venue Not Found: " + venueID));
+                venueSet.add(venue);
+            }
         }
 
         campaign.setName(campaignCreateDTO.getName());
@@ -134,6 +134,21 @@ public class CampaignService {
 
         campaignRepository.delete(campaign);
         return "Deleted";
+    }
+
+    // A hoster always creates for itself; an admin must name the host the campaign belongs to.
+    private Hoster resolveCreatingHoster(campaignCreateDTO campaignCreateDTO, AuthEntity me) {
+        if (me.getHoster() != null) {
+            return me.getHoster();
+        }
+        if (!isAdmin(me)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only hosters can create campaigns");
+        }
+        if (campaignCreateDTO.getHosterID() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "hosterID is required when an admin creates a campaign");
+        }
+        return hosterUserRepository.findById(campaignCreateDTO.getHosterID())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Hoster Not Found!"));
     }
 
     private boolean isAdmin(AuthEntity me) {

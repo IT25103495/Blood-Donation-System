@@ -27,7 +27,8 @@ public class CampaignController {
     @Autowired
     private CampaignService campaignService;
 
-    @PreAuthorize("hasRole('HOSTER')")
+    // A hoster creates its own campaign; an admin creates one on behalf of a host (hosterID in the body).
+    @PreAuthorize("hasAnyRole('HOSTER','ADMIN')")
     @PostMapping()
     public @ResponseBody String addNewCampaign(@Valid @RequestBody campaignCreateDTO campaign, @AuthenticationPrincipal AuthEntity me) {
         return campaignService.addNewCampaign(campaign, me);

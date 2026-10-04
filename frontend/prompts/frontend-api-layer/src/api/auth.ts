@@ -1,6 +1,6 @@
 import { api, toArray } from './client';
 import type {
-  AdminCreate, DonorCreate, Hospital, HospitalCreate, HosterCreate, LoginRequest, TokenResponse, Admin,
+  AdminCreate, DonorCreate, Hospital, HospitalCreate, Hoster, HosterCreate, LoginRequest, TokenResponse, Admin,
 } from '../types/api';
 
 export const authApi = {
@@ -18,6 +18,12 @@ export const authApi = {
     toArray<Hospital & { ID?: number }>(r.data).map((hospital) => ({
       ...hospital,
       id: hospital.id ?? hospital.ID ?? 0,
+    })),
+  ),
+  getHosters: () => api.get('/auth/get/hosterList').then((r) =>
+    toArray<Hoster & { ID?: number }>(r.data).map((hoster) => ({
+      ...hoster,
+      id: hoster.id ?? hoster.ID ?? 0,
     })),
   ),
   getAdmins: () => api.get('/auth/get/adminList').then((r) =>
