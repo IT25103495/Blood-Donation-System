@@ -12,3 +12,8 @@ frontend/.env
 backend/backend_run.log
 backend/backend_run_err.log
 user_accs.MD
+backend/data/db.mv.db
+package-lock.json
+backend/pom.xml
+backend/pom.xml
+backend/pom.xml
