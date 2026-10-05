@@ -25,6 +25,42 @@ export interface Hoster {
   phoneNum: string;
 }
 
+export interface Donor {
+  id: number;
+  username: string;
+  // The backend keeps the underscore spelling on these two.
+  f_Name: string;
+  l_Name: string;
+  nic: string;
+  bloodType: string;
+  dob: ISODate;
+  phoneNum: string;
+}
+
+/** The four kinds of account, as /auth/delete/user and /auth/get/user expect them. */
+export type UserType = 'DONOR' | 'HOSTER' | 'HOSPITAL' | 'ADMIN';
+
+/**
+ * The signed-in account, from /auth/get/me. The endpoint returns whichever user type the token
+ * belongs to, so everything past the shared fields depends on the role. Email is deliberately
+ * absent: it lives on the auth record and the backend does not serialise it here.
+ */
+export interface Me {
+  id: number;
+  username: string;
+  email: string;
+  phoneNum: string;
+  f_Name?: string;
+  l_Name?: string;
+  nic?: string;
+  bloodType?: string;
+  dob?: ISODate;
+  orgName?: string;
+  hospitalName?: string;
+  address?: string;
+  type?: AdminType;
+}
+
 export interface Hospital {
   id: number;
   username: string;
@@ -64,12 +100,10 @@ export interface AppointmentResponseRaw {
   status: AppointmentStatus;
   donor: {
     donorID: number;
-    // Backend currently serialises these as "getfName"/"getlName" (Lombok/Jackson naming issue).
-    getfName?: string;
-    getlName?: string;
-    fName?: string;
-    lName?: string;
+    fName: string;
+    lName: string;
     bloodType: string;
+    phoneNum: string;
   };
   campaign: { campID: number; name: string; startDate: ISODate; endDate: ISODate };
   venue: { venueID: number; name: string; address: string };
@@ -80,7 +114,7 @@ export interface Appointment {
   appID: number;
   date: ISODate;
   status: AppointmentStatus;
-  donor: { donorID: number; firstName: string; lastName: string; bloodType: string };
+  donor: { donorID: number; firstName: string; lastName: string; bloodType: string; phone: string };
   campaign: { campID: number; name: string; startDate: ISODate; endDate: ISODate };
   venue: { venueID: number; name: string; address: string };
 }
@@ -156,6 +190,35 @@ export interface AdminCreate {
   username: string;
   password: string;
   type: AdminType;
+}
+
+/* ---------- Account edits ----------
+   Every field is optional: the backend applies only the ones that arrive non-empty and leaves the
+   rest alone, so an omitted password means "keep the current password". */
+
+export interface UserUpdate {
+  id: number;
+  email?: string;
+  phoneNum?: string;
+  username?: string;
+  password?: string;
+}
+
+export interface DonorUpdate extends UserUpdate {
+  f_Name?: string;
+  l_Name?: string;
+  nic?: string;
+  bloodType?: string;
+  dob?: ISODate;
+}
+
+export interface HosterUpdate extends UserUpdate {
+  orgName?: string;
+}
+
+export interface HospitalUpdate extends UserUpdate {
+  hospitalName?: string;
+  address?: string;
 }
 
 /* ---------- Request bodies ---------- */

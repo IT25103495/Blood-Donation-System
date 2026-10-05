@@ -6,8 +6,11 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface InventoryRepository extends CrudRepository<Inventory, Integer> {
+    Optional<Inventory> findByAppointment_AppID(Integer appID);
+
     @Query(value = "SELECT * FROM Inventory WHERE BankID = :bankID", nativeQuery = true)
     List<Inventory> findAllByBankID(@Param("bankID") Integer bankID);
 

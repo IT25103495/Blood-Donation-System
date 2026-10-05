@@ -14,6 +14,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
+import java.util.ArrayList;
 import java.util.List;
 
 @JsonIdentityInfo(
@@ -88,9 +89,16 @@ public class AuthEntity implements UserDetails {
         this.userType = userType;
     }
 
+    // Admins also carry their type as a role (ROLE_SYSADMIN / ROLE_MANAGER / ROLE_DOCTOR) so that
+    // @PreAuthorize can tell them apart. Without it every admin endpoint is open to all three.
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("ROLE_" + getUserType().name()));
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        authorities.add(new SimpleGrantedAuthority("ROLE_" + getUserType().name()));
+        if (admin != null && admin.getType() != null) {
+            authorities.add(new SimpleGrantedAuthority("ROLE_" + admin.getType().name()));
+        }
+        return authorities;
     }
 
     public Admin getAdmin() {

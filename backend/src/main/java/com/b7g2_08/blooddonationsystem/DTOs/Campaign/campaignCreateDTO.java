@@ -15,8 +15,12 @@ public class campaignCreateDTO {
     protected LocalDate startDate;
     @NotNull(message = "endDate is required")
     protected LocalDate endDate;
+    // A campaign has to run somewhere, so it is created with at least one venue. More can be added,
+    // and these ones swapped out, from the campaign's own page afterwards.
     @NotEmpty(message = "at least one venue is required")
     protected Set<@NotNull Integer> venueIDs;
+    // Only read when an admin creates the campaign; a hoster always creates for itself.
+    protected Integer hosterID;
 
     @AssertTrue(message = "endDate must not be before startDate")
     private boolean isDateRangeValid() {
@@ -37,5 +41,9 @@ public class campaignCreateDTO {
 
     public Set<Integer> getVenueIDs() {
         return venueIDs;
+    }
+
+    public Integer getHosterID() {
+        return hosterID;
     }
 }
