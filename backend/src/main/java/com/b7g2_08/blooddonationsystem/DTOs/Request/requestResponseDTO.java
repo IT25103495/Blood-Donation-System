@@ -13,6 +13,7 @@ public class requestResponseDTO {
     private LocalDate deadline;
     private reqStatus status;
     private Integer hospitalID;
+    private String hospitalName;
 
     public requestResponseDTO(Request req) {
         this.reqID = req.getReqID();
@@ -20,6 +21,7 @@ public class requestResponseDTO {
         this.deadline = req.getDeadline();
         this.status = req.getStatus();
         this.hospitalID = req.getHospital().getID();
+        this.hospitalName = req.getHospital().getHospitalName();
     }
 
     public Integer getReqID() { return reqID; }
@@ -27,4 +29,5 @@ public class requestResponseDTO {
     public LocalDate getDeadline() { return deadline; }
     public reqStatus getStatus() { return status; }
     public Integer getHospitalID() { return hospitalID; }
+    public String getHospitalName() { return hospitalName; }
 }

@@ -11,4 +11,3 @@ frontend/.env
 .claude/launch.json
 backend/backend_run.log
 backend/backend_run_err.log
-user_accs.MD

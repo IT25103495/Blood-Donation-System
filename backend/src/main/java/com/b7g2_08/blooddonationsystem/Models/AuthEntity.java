@@ -40,17 +40,19 @@ public class AuthEntity implements UserDetails {
     @Enumerated(EnumType.STRING)
     private userType userType;
 
-    @OneToOne(mappedBy = "authEntity")
+    @OneToOne(mappedBy = "authEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private Admin admin;
-    @OneToOne(mappedBy = "authEntity")
+    @OneToOne(mappedBy = "authEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private Donor donor;
-    @OneToOne(mappedBy = "authEntity")
+    @OneToOne(mappedBy = "authEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private Hospital hospital;
-    @OneToOne(mappedBy = "authEntity")
+    @OneToOne(mappedBy = "authEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private Hoster hoster;
 
     @Override
     public boolean isAccountNonExpired() { return true; }
+
+    public Integer getId() { return id;}
 
     public String getEmail() {
         return email;

@@ -13,7 +13,7 @@ export const campaignsApi = {
   setStatus: (id: number, status: CampaignStatus) =>
     api.post<string>(`/api/campaigns/${id}/status`, { status }).then((r) => r.data),
   assignVenue: (campID: number, venueID: number) =>
-    api.put<string>('/api/campaigns/assignVenue', null, { params: { campID, venueID } }).then((r) => r.data),
+    api.put<string>('/api/campaigns/venue', null, { params: { campID, venueID } }).then((r) => r.data),
 };
 
 /** Campaigns a donor may book: APPROVED and not yet ended. */

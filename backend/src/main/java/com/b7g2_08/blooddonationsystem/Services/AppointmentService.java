@@ -5,12 +5,15 @@ import com.b7g2_08.blooddonationsystem.DTOs.Appointment.appointmentResponseDTO;
 import com.b7g2_08.blooddonationsystem.DTOs.Appointment.appointmentStatusUpdateDTO;
 import com.b7g2_08.blooddonationsystem.DTOs.Appointment.appointmentUpdateDTO;
 import com.b7g2_08.blooddonationsystem.Enums.appStatus;
+import com.b7g2_08.blooddonationsystem.Enums.itemStatus;
 import com.b7g2_08.blooddonationsystem.Models.Appointment;
 import com.b7g2_08.blooddonationsystem.Models.Campaign;
+import com.b7g2_08.blooddonationsystem.Models.Inventory;
 import com.b7g2_08.blooddonationsystem.Models.Users.Donor;
 import com.b7g2_08.blooddonationsystem.Models.Venue;
 import com.b7g2_08.blooddonationsystem.Repos.AppointmentRepository;
 import com.b7g2_08.blooddonationsystem.Repos.CampaignRepository;
+import com.b7g2_08.blooddonationsystem.Repos.InventoryRepository;
 import com.b7g2_08.blooddonationsystem.Repos.Users.DonorUserRepository;
 import com.b7g2_08.blooddonationsystem.Repos.VenueRepository;
 import jakarta.transaction.Transactional;
@@ -35,6 +38,8 @@ public class AppointmentService {
     private DonorUserRepository donorUserRepository;
     @Autowired
     private VenueRepository venueRepository;
+    @Autowired
+    private InventoryRepository inventoryRepository;
 
     @Transactional
     public @ResponseBody String addNewAppointment(appointmentCreateDTO appointmentCreateDTO) {
@@ -94,12 +99,25 @@ public class AppointmentService {
 
     @Transactional
     public @ResponseBody String updateAppointmentStatus(int id, appointmentStatusUpdateDTO appointmentStatusUpdateDTO) {
+        String returnStr = "Status Updated";
+
         Appointment appointment = appointmentRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Appointment Not Found!"));
+
+        if (appointment.getStatus() == appStatus.BOOKED && appointmentStatusUpdateDTO.getStatus() == appStatus.COMPLETE) {
+            Inventory item = new Inventory();
+            item.setStatus(itemStatus.AVAILABLE);
+            item.setDateCollected(appointment.getDate());
+            item.setAppointment(appointment);
+            item.setBank(appointment.getVenue().getAssignedBank());
+            item.setBloodType(appointment.getDonor().getBloodType());
+            inventoryRepository.save(item);
+            appointment.setItem(item);
+            returnStr = returnStr + " and Inventory Item Created";
+        }
 
         appointment.setStatus(appointmentStatusUpdateDTO.getStatus());
         appointmentRepository.save(appointment);
-        return "Status Updated";
-
+        return returnStr;
     }
 
     @Transactional

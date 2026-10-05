@@ -44,6 +44,7 @@ public class Appointment {
 
     //FIXME: If this doesn't work, map by appID
     @OneToOne(mappedBy = "appointment")
+    @JoinColumn(name = "itemID", nullable = true)
     @JsonIdentityReference(alwaysAsId = true)
     private Inventory item;
 
