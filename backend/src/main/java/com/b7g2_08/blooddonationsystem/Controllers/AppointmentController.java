@@ -8,7 +8,9 @@ import com.b7g2_08.blooddonationsystem.Enums.appStatus;
 import com.b7g2_08.blooddonationsystem.Services.AppointmentService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
+import com.b7g2_08.blooddonationsystem.Models.AuthEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,7 +33,7 @@ public class AppointmentController {
     }
 
     // view all appointments
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('SYSADMIN','DOCTOR')")
     @GetMapping()
     public @ResponseBody List<appointmentResponseDTO> getAllAppointments() {
 
@@ -39,31 +41,38 @@ public class AppointmentController {
     }
 
     //view appointment by id
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('SYSADMIN','DOCTOR')")
     @GetMapping("/{id}")
     public @ResponseBody appointmentResponseDTO getAppointmentById(@PathVariable int id) {
         return appointmentService.getAppointmentById(id);
     }
 
     //update appointment
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('SYSADMIN','DOCTOR')")
     @PutMapping("/{id}")
     public @ResponseBody String updateAppointment(@PathVariable int id,@RequestBody appointmentUpdateDTO appointmentUpdateDTO) {
         return appointmentService.updateAppointment(id, appointmentUpdateDTO);
     }
 
     //update appointment status
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('SYSADMIN','DOCTOR')")
     @PostMapping("/{id}/status")
     public @ResponseBody String updateAppointmentStatus(@PathVariable int id,@RequestBody appointmentStatusUpdateDTO status) {
         return appointmentService.updateAppointmentStatus(id, status);
     }
 
     //delete appointment
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('SYSADMIN')")
     @DeleteMapping("/{id}")
     public @ResponseBody String deleteAppointment(@PathVariable int id) {
         return appointmentService.deleteAppointment(id);
+    }
+
+    //a donor calling off their own booking
+    @PreAuthorize("hasRole('DONOR')")
+    @PostMapping("/me/{id}/cancel")
+    public @ResponseBody String cancelMyAppointment(@PathVariable int id, @AuthenticationPrincipal AuthEntity me) {
+        return appointmentService.cancelOwnAppointment(id, me);
     }
 
     @PreAuthorize("hasRole('DONOR')")

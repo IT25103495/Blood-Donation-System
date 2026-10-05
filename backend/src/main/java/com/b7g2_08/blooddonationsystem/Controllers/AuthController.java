@@ -47,7 +47,7 @@ public class AuthController {
         return authService.login(user);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('SYSADMIN')")
     @PostMapping(path="/register/admin")
     public @ResponseBody String register_admin(@RequestBody adminCreateDTO user) {
         return authService.register_admin(user);
@@ -73,40 +73,42 @@ public class AuthController {
         return authService.register_hoster(user);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('SYSADMIN')")
     @PutMapping(path="/edit/admin")
     public @ResponseBody String edit_admin(@RequestBody adminUpdateDTO user) {
         return authService.edit_admin(user);
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'DONOR')")
+    @PreAuthorize("hasAnyRole('SYSADMIN', 'DONOR')")
     @PutMapping(path="/edit/donor")
     public @ResponseBody String edit_donor(@RequestBody donorUpdateDTO user) {
         return authService.edit_donor(user);
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'HOSPITAL')")
+    @PreAuthorize("hasAnyRole('SYSADMIN', 'HOSPITAL')")
     @PutMapping(path="/edit/hospital")
     public @ResponseBody String edit_hospital(@RequestBody hospitalUpdateDTO user) {return authService.edit_hospital(user);}
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'HOSTER')")
+    @PreAuthorize("hasAnyRole('SYSADMIN', 'HOSTER')")
     @PutMapping(path="/edit/hoster")
     public @ResponseBody String edit_hoster(@RequestBody hosterUpdateDTO user) {return authService.edit_hoster(user);}
     //TODO: Then make delete endpoints (maybe copy my getMe method to delete the current user?)
 
-    @PreAuthorize("hasRole('ADMIN')")
+    // Managers need this to pick the admin who runs a blood bank; the other account lists, and every
+    // write, stay with the sysadmin.
+    @PreAuthorize("hasAnyRole('SYSADMIN','MANAGER')")
     @GetMapping(path = "/get/adminList")
     public @ResponseBody Iterable<Admin> getAdmins() { return authService.getAdmins();}
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('SYSADMIN')")
     @GetMapping(path = "/get/donorList")
     public @ResponseBody Iterable<Donor> getDonors() { return authService.getDonors();}
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('SYSADMIN')")
     @GetMapping(path = "/get/hosterList")
     public @ResponseBody Iterable<Hoster> getHosters() { return authService.getHosters();}
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('SYSADMIN')")
     @GetMapping(path = "/get/hospitalList")
     public @ResponseBody Iterable<Hospital> getHospitals() { return authService.getHospitals();}
 
@@ -124,13 +126,13 @@ public class AuthController {
     @DeleteMapping(path = "/delete/me")
     public @ResponseBody String deleteMe(@AuthenticationPrincipal AuthEntity me) {return authService.deleteMe(me);}
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('SYSADMIN')")
     @GetMapping("/get/user")
     public @ResponseBody User getUser (@RequestParam userType type, @RequestParam int ID) {
         return authService.getUser(type, ID);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('SYSADMIN')")
     @DeleteMapping(path = "/delete/user")
     public @ResponseBody String deleteUser(@RequestParam userType type, @RequestParam int ID) {
         return authService.deleteUser(type, ID);

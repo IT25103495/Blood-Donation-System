@@ -12,9 +12,10 @@ export function mapAppointment(raw: AppointmentResponseRaw): Appointment {
     venue: raw.venue,
     donor: {
       donorID: raw.donor?.donorID,
-      firstName: raw.donor?.getfName ?? raw.donor?.fName ?? '',
-      lastName: raw.donor?.getlName ?? raw.donor?.lName ?? '',
+      firstName: raw.donor?.fName ?? '',
+      lastName: raw.donor?.lName ?? '',
       bloodType: raw.donor?.bloodType ?? '',
+      phone: raw.donor?.phoneNum ?? '',
     },
   };
 }
@@ -38,6 +39,9 @@ export const appointmentsApi = {
   update: (id: number, body: AppointmentUpdate) =>
     api.put<string>(`/api/appointment/${id}`, body).then((r) => r.data),
   remove: (id: number) => api.delete<string>(`/api/appointment/${id}`).then((r) => r.data),
+  /** A donor calling off their own booking; the admin status endpoint is not open to them. */
+  cancelMine: (id: number) => api.post<string>(`/api/appointment/me/${id}/cancel`).then((r) => r.data),
+
   setStatus: (id: number, status: AppointmentStatus) =>
     api.post<string>(`/api/appointment/${id}/status`, { status }).then((r) => r.data),
 };

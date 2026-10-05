@@ -36,15 +36,16 @@ public class CampaignService {
     public @ResponseBody String addNewCampaign(campaignCreateDTO campaignCreateDTO, AuthEntity me) {
 
         Campaign campaign = new Campaign();
-        Hoster hoster = me.getHoster();
-        if (hoster == null) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only hosters can create campaigns");
-        }
+        Hoster hoster = resolveCreatingHoster(campaignCreateDTO, me);
         Set<Venue> venueSet = new HashSet<>();
-        for (Integer venueID : campaignCreateDTO.getVenueIDs()) {
-            Venue venue = venueRepository.findById(venueID)
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Venue Not Found: " + venueID));
-            venueSet.add(venue);
+        // @NotEmpty on the DTO already guarantees at least one id; the check keeps this safe for any
+        // caller that reaches the service without going through request validation.
+        if (campaignCreateDTO.getVenueIDs() != null) {
+            for (Integer venueID : campaignCreateDTO.getVenueIDs()) {
+                Venue venue = venueRepository.findById(venueID)
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Venue Not Found: " + venueID));
+                venueSet.add(venue);
+            }
         }
 
         campaign.setName(campaignCreateDTO.getName());
@@ -111,6 +112,11 @@ public class CampaignService {
             campaign.setHoster(hoster);
         }
         if (campaignUpdateDTO.getVenueIDs() != null) {
+            // Leaving venueIDs out keeps the current venues; sending an empty set would strip them
+            // all, and a campaign with nowhere to donate is not a campaign.
+            if (campaignUpdateDTO.getVenueIDs().isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A campaign must keep at least one venue.");
+            }
             Set<Venue> venueSet = new HashSet<>();
             for (Integer venueID : campaignUpdateDTO.getVenueIDs()) {
                 Venue venue = venueRepository.findById(venueID)
@@ -134,6 +140,21 @@ public class CampaignService {
 
         campaignRepository.delete(campaign);
         return "Deleted";
+    }
+
+    // A hoster always creates for itself; an admin must name the host the campaign belongs to.
+    private Hoster resolveCreatingHoster(campaignCreateDTO campaignCreateDTO, AuthEntity me) {
+        if (me.getHoster() != null) {
+            return me.getHoster();
+        }
+        if (!isAdmin(me)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only hosters can create campaigns");
+        }
+        if (campaignCreateDTO.getHosterID() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "hosterID is required when an admin creates a campaign");
+        }
+        return hosterUserRepository.findById(campaignCreateDTO.getHosterID())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Hoster Not Found!"));
     }
 
     private boolean isAdmin(AuthEntity me) {

@@ -16,6 +16,7 @@ import com.b7g2_08.blooddonationsystem.DesignPattern.User.*;
 import com.b7g2_08.blooddonationsystem.Enums.bloodTypeList;
 import com.b7g2_08.blooddonationsystem.Enums.userType;
 import com.b7g2_08.blooddonationsystem.Models.AuthEntity;
+import com.b7g2_08.blooddonationsystem.Enums.adminType;
 import com.b7g2_08.blooddonationsystem.Models.Users.Admin;
 import com.b7g2_08.blooddonationsystem.Models.Users.Donor;
 import com.b7g2_08.blooddonationsystem.Models.Users.Hospital;
@@ -249,7 +250,9 @@ public class AuthService {
             user.setNic(_user.getNic());
         if (checkNullEmpty(_user.getBloodType()))
             user.setBloodType(_user.getBloodType());
-        if (_user.getDob() != user.getDob())
+        // Guarded like every other field here: leaving dob out of the request used to null it, and
+        // "!=" on LocalDate compares references, so an unchanged date still counted as a change.
+        if (_user.getDob() != null && !_user.getDob().equals(user.getDob()))
             user.setDob(_user.getDob());
         if (checkNullEmpty(_user.getPhoneNum()))
             user.setPhoneNum(_user.getPhoneNum());
@@ -344,6 +347,15 @@ public class AuthService {
 
     @Transactional
     public @ResponseBody String deleteUser (userType type, int ID) {
+        // Sysadmins are the only accounts that can manage other admins, so deleting one can lock
+        // everybody out of administration. Demote the account first if it really has to go.
+        if (type == userType.ADMIN) {
+            Admin admin = adminRepo.findById(ID)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User Not Found!"));
+            if (admin.getType() == adminType.SYSADMIN)
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Sysadmin accounts cannot be deleted.");
+        }
+
         UserContext context = setupContext(type);
         if (context != null)
             return context.delete(ID);
