@@ -5,15 +5,22 @@ import com.b7g2_08.blooddonationsystem.Models.Users.Admin;
 import com.b7g2_08.blooddonationsystem.Models.Users.Donor;
 import com.b7g2_08.blooddonationsystem.Models.Users.Hospital;
 import com.b7g2_08.blooddonationsystem.Models.Users.Hoster;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
+import java.util.ArrayList;
 import java.util.List;
 
+@JsonIdentityInfo(
+        generator = ObjectIdGenerators.PropertyGenerator.class,
+        property = "id"
+)
 @Entity
 public class AuthEntity implements UserDetails {
 
@@ -34,17 +41,19 @@ public class AuthEntity implements UserDetails {
     @Enumerated(EnumType.STRING)
     private userType userType;
 
-    @OneToOne(mappedBy = "authEntity")
+    @OneToOne(mappedBy = "authEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private Admin admin;
-    @OneToOne(mappedBy = "authEntity")
+    @OneToOne(mappedBy = "authEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private Donor donor;
-    @OneToOne(mappedBy = "authEntity")
+    @OneToOne(mappedBy = "authEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private Hospital hospital;
-    @OneToOne(mappedBy = "authEntity")
+    @OneToOne(mappedBy = "authEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private Hoster hoster;
 
     @Override
     public boolean isAccountNonExpired() { return true; }
+
+    public Integer getId() { return id;}
 
     public String getEmail() {
         return email;
@@ -80,9 +89,16 @@ public class AuthEntity implements UserDetails {
         this.userType = userType;
     }
 
+    // Admins also carry their type as a role (ROLE_SYSADMIN / ROLE_MANAGER / ROLE_DOCTOR) so that
+    // @PreAuthorize can tell them apart. Without it every admin endpoint is open to all three.
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("ROLE_" + getUserType().name()));
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        authorities.add(new SimpleGrantedAuthority("ROLE_" + getUserType().name()));
+        if (admin != null && admin.getType() != null) {
+            authorities.add(new SimpleGrantedAuthority("ROLE_" + admin.getType().name()));
+        }
+        return authorities;
     }
 
     public Admin getAdmin() {

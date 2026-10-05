@@ -1,0 +1,1 @@
+export * from '../../prompts/frontend-api-layer/src/utils/bloodTypes'

@@ -1,0 +1,76 @@
+import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
+import { appointmentsApi, campaignsApi, getErrorMessage, inventoryApi, requestsApi } from '../../api'
+import { Card } from '../../components/Card'
+import { ErrorState } from '../../components/ErrorState'
+import { Skeleton } from '../../components/Skeleton'
+import { useAuth } from '../../context/AuthContext'
+import { BLOOD_TYPES } from '../../utils/constants'
+import { countAvailableByType } from '../../utils/bloodTypes'
+import type { Appointment, BloodRequest, Campaign, InventoryItem } from '../../types/api'
+const today = () => new Date().toISOString().slice(0, 10)
+// A blood type counts as "low stock" once the bank has fewer than this many available units.
+const LOW_STOCK_THRESHOLD = 5
+function StatCard({ to, label, value, tone }: { to: string; label: string; value: number; tone?: 'warn' }) {
+  return <Link to={to} className="block rounded-lg border border-slate-200 bg-white p-5 shadow-sm transition hover:border-red-300 hover:shadow-md">
+    <p className="text-sm text-slate-500">{label}</p>
+    <p className={`mt-3 text-3xl font-bold ${tone === 'warn' && value > 0 ? 'text-red-700' : 'text-slate-950'}`}>{value}</p>
+  </Link>
+}
+export function AdminOverviewPage() {
+  const { adminType } = useAuth()
+  // A manager has no campaigns or appointments to look after, and the backend refuses those two
+  // endpoints for them, so the overview asks only for what their dashboard actually shows.
+  const isManager = adminType === 'MANAGER'
+  const [data, setData] = useState<{ campaigns: Campaign[]; requests: BloodRequest[]; appointments: Appointment[]; inventory: InventoryItem[] } | null>(null)
+  const [error, setError] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  const load = () => {
+    setLoading(true)
+    Promise.all([
+      isManager ? Promise.resolve<Campaign[]>([]) : campaignsApi.getAll(),
+      requestsApi.getAll(),
+      isManager ? Promise.resolve<Appointment[]>([]) : appointmentsApi.getAll(),
+      inventoryApi.getAvailable(),
+    ])
+      .then(([campaigns, requests, appointments, inventory]) => setData({ campaigns, requests, appointments, inventory }))
+      .catch((err: unknown) => setError(getErrorMessage(err)))
+      .finally(() => setLoading(false))
+  }
+  useEffect(load, [isManager])
+
+  if (loading) return <div className="space-y-5"><Skeleton className="h-12 w-64" /><div className="grid gap-4 md:grid-cols-4"><Skeleton className="h-28" /><Skeleton className="h-28" /><Skeleton className="h-28" /><Skeleton className="h-28" /></div><Skeleton className="h-64" /></div>
+  if (error || !data) return <ErrorState message={error ?? 'Could not load the admin overview.'} retry={load} />
+
+  const stock = countAvailableByType(data.inventory)
+  const maxStock = Math.max(1, ...BLOOD_TYPES.map((type) => stock[type]))
+  const lowStockCount = BLOOD_TYPES.filter((type) => stock[type] < LOW_STOCK_THRESHOLD).length
+  return <div className="space-y-8">
+    <div>
+      <p className="eyebrow">Administration</p>
+      <h1 className="app-title mt-2 text-4xl font-bold text-slate-950">Overview</h1>
+      <p className="mt-2 text-slate-600">{isManager ? 'Blood requests and the stock behind them.' : 'A quick view of today’s donation operations.'}</p>
+    </div>
+    <div className={`grid gap-4 ${isManager ? 'md:grid-cols-2' : 'md:grid-cols-4'}`}>
+      {!isManager && <StatCard to="/admin/approvals/campaigns" label="Pending campaigns" value={data.campaigns.filter((item) => item.status === 'PENDING').length} />}
+      <StatCard to="/admin/approvals/requests" label="Pending requests" value={data.requests.filter((item) => item.status === 'PENDING').length} />
+      {!isManager && <StatCard to="/admin/appointments" label="Today’s appointments" value={data.appointments.filter((item) => item.date === today()).length} />}
+      <StatCard to="/admin/inventory" label="Low-stock types" value={lowStockCount} tone="warn" />
+    </div>
+    <Card>
+      <div className="flex items-start justify-between">
+        <div>
+          <h2 className="text-xl font-bold text-slate-950">Available stock</h2>
+          <p className="mt-1 text-sm text-slate-500">{data.inventory.length} available unit{data.inventory.length === 1 ? '' : 's'} across all banks.</p>
+        </div>
+        <span className="text-sm text-slate-500">{adminType}</span>
+      </div>
+      <div className="mt-6 space-y-4">{BLOOD_TYPES.map((type) => <div key={type} className="grid grid-cols-[2.5rem_1fr_2rem] items-center gap-3 text-sm">
+        <span className="font-semibold text-slate-700">{type}</span>
+        <div className="h-3 rounded-full bg-slate-100"><div className={`h-3 rounded-full transition-all ${stock[type] < LOW_STOCK_THRESHOLD ? 'bg-amber-500' : 'bg-red-700'}`} style={{ width: `${(stock[type] / maxStock) * 100}%` }} /></div>
+        <span className="text-right font-semibold text-slate-700">{stock[type]}</span>
+      </div>)}</div>
+    </Card>
+  </div>
+}

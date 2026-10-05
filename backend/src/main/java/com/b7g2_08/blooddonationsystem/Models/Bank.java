@@ -1,9 +1,17 @@
 package com.b7g2_08.blooddonationsystem.Models;
 
+import com.b7g2_08.blooddonationsystem.Models.Users.Admin;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.Entity;
 import jakarta.persistence.*;
 
+@JsonIdentityInfo(
+        generator = ObjectIdGenerators.PropertyGenerator.class,
+        property = "bankID"
+)
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Entity
 public class Bank {
@@ -16,6 +24,11 @@ public class Bank {
 
     @Column(name = "Address")
     private String address;
+
+    @OneToOne
+    @JoinColumn(name = "ManagerID", referencedColumnName = "ID")
+    @JsonIdentityReference(alwaysAsId = true)
+    private Admin manager;
 
     public Integer getBankID() {
         return bankID;
@@ -39,5 +52,13 @@ public class Bank {
 
     public void setAddress(String address) {
         this.address = address;
+    }
+
+    public Admin getManager() {
+        return manager;
+    }
+
+    public void setManager(Admin manager) {
+        this.manager = manager;
     }
 }

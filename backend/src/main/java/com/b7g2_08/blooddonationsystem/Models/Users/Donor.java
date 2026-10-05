@@ -17,7 +17,7 @@ public class Donor extends User {
     private String l_Name;
 
     @Column(name = "NIC")
-    private String NIC;
+    private String nic;
 
     @Column(name = "Blood Type")
     private String bloodType;
@@ -57,11 +57,11 @@ public class Donor extends User {
         this.dob = dob;
     }
 
-    public String getNIC() {
-        return NIC;
+    public String getNic() {
+        return nic;
     }
 
-    public void setNIC(String NIC) {
-        this.NIC = NIC;
+    public void setNic(String nic) {
+        this.nic = nic;
     }
 }

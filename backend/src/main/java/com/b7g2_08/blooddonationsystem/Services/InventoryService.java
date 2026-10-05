@@ -2,6 +2,7 @@ package com.b7g2_08.blooddonationsystem.Services;
 
 import com.b7g2_08.blooddonationsystem.DTOs.Inventory.inventoryCreateDTO;
 import com.b7g2_08.blooddonationsystem.DTOs.Inventory.inventoryStatusDTO;
+import com.b7g2_08.blooddonationsystem.Enums.bloodTypeList;
 import com.b7g2_08.blooddonationsystem.Enums.itemStatus;
 import com.b7g2_08.blooddonationsystem.Models.Appointment;
 import com.b7g2_08.blooddonationsystem.Models.Bank;
@@ -28,10 +29,20 @@ public class InventoryService {
     //TODO: When 'DOCTOR' admins log in and set an appointment to 'completed' it should run this method with the necessary data automatically - will need another method to do that
     @Transactional
     public @ResponseBody String addNewInventory(inventoryCreateDTO _item) {
+        checkBloodType(_item.getBloodType());
         Inventory item = new Inventory();
 
         //Fetches the appointment and bank objects by the IDs provided in the DTO
         Appointment appointment = appointmentRepo.findById(_item.getAppointmentID()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Appointment Not Found!"));
+
+        // One appointment yields one unit, and the appID column is unique because of the @OneToOne.
+        // Checked here so the caller is told which unit already exists instead of getting the
+        // generic "duplicate value" conflict the database constraint produces.
+        inventoryRepo.findByAppointment_AppID(appointment.getAppID()).ifPresent(existing -> {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "Appointment " + appointment.getAppID() + " already has inventory unit #" + existing.getItemID() + " recorded against it.");
+        });
+
         Bank bank = bankRepo.findById(_item.getBankID()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Bank Not Found!"));
 
         item.setAppointment(appointment);
@@ -55,10 +66,16 @@ public class InventoryService {
 
     @Transactional
     public @ResponseBody String deleteItem(int ID) {
-        if (inventoryRepo.existsById(ID)) {
-            inventoryRepo.deleteById(ID);
-            return "Deleted";
-        }
-        else return "Not Found";
+        Inventory item = inventoryRepo.findById(ID).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Item Not Found!"));
+        Appointment appointment = item.getAppointment();
+        appointment.setItem(null);
+        appointmentRepo.save(appointment);
+        inventoryRepo.deleteById(ID);
+        return "Deleted";
+    }
+
+    private void checkBloodType(String bloodType) {
+        if (!bloodTypeList.list.contains(bloodType))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid Blood Type");
     }
 }

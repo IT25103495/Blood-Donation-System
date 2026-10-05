@@ -1,10 +1,16 @@
 package com.b7g2_08.blooddonationsystem.Abstracts;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.b7g2_08.blooddonationsystem.Models.AuthEntity;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 
+@JsonIdentityInfo(
+        generator = ObjectIdGenerators.PropertyGenerator.class,
+        property = "ID"
+)
 @MappedSuperclass
 public abstract class User {
     @Id
@@ -22,7 +28,7 @@ public abstract class User {
 
     @JsonIgnore
     @OneToOne
-    @JoinColumn(name = "id", nullable = false)
+    @JoinColumn(name = "authID", referencedColumnName = "id", nullable = false)
     //FIXME: Used to be name = "authId", fix if broken
     private AuthEntity authEntity;
 
@@ -44,6 +50,13 @@ public abstract class User {
     @JsonProperty("username")
     public String getUsername() {
         return authEntity != null ? authEntity.getUsername() : null;
+    }
+
+    // Lifted off the auth record the same way the username is, so a user can see and edit the email
+    // on their own profile instead of being shown a blank field they cannot verify.
+    @JsonProperty("email")
+    public String getEmail() {
+        return authEntity != null ? authEntity.getEmail() : null;
     }
 
     public void setID(Integer ID) {
