@@ -3,16 +3,13 @@ import { Link, NavLink, Outlet } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { dashboardFor } from '../routes/ProtectedRoute'
 
-// Donors and campaign hosts get their own pages as a tab strip inside their workspace
-// (WorkspaceNav), so this header carries only what is true everywhere: the eligibility guide, and a
-// way back for the roles whose dashboard lives on different chrome entirely.
-const WORKSPACE_ROLES = ['DONOR', 'HOSTER']
-
 export function PublicLayout() {
   const { token, role, adminType, logout } = useAuth()
+  // One way in for every signed-in role. For donors and campaign hosts the dashboard is where their
+  // own tab strip (WorkspaceNav) lives, so this link is all the header needs to carry for them.
   const navLinks = [
     { to: '/eligibility', label: 'Eligibility' },
-    ...(token && role && !WORKSPACE_ROLES.includes(role) ? [{ to: dashboardFor(role, adminType), label: 'My dashboard' }] : []),
+    ...(token && role ? [{ to: dashboardFor(role, adminType), label: 'Dashboard' }] : []),
   ]
   const linkClass = ({ isActive }: { isActive: boolean }) => (isActive ? 'text-red-700' : 'text-slate-600 hover:text-red-700')
 
