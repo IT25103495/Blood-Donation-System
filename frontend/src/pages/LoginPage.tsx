@@ -1,4 +1,3 @@
-import { Eye, EyeOff } from 'lucide-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Link, useNavigate } from 'react-router-dom'
@@ -13,7 +12,6 @@ type LoginValues = { username: string; password: string }
 export function LoginPage() {
   const { login } = useAuth()
   const navigate = useNavigate()
-  const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<LoginValues>({ defaultValues: { username: '', password: '' } })
 
@@ -41,10 +39,8 @@ export function LoginPage() {
     {error && <div role="alert" className="mt-6 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-800">{error}</div>}
     <form className="mt-8 space-y-5" onSubmit={handleSubmit(submit)}>
       <Input label="Username" id="username" autoComplete="username" error={errors.username?.message} {...register('username', { required: 'Enter your username.' })} />
-      <div className="relative">
-        <Input label="Password" id="password" type={showPassword ? 'text' : 'password'} autoComplete="current-password" error={errors.password?.message} {...register('password', { required: 'Enter your password.' })} />
-        <button type="button" className="absolute right-3 top-9 text-slate-500 hover:text-slate-900" onClick={() => setShowPassword((visible) => !visible)} aria-label={showPassword ? 'Hide password' : 'Show password'}>{showPassword ? <EyeOff size={18} /> : <Eye size={18} />}</button>
-      </div>
+      {/* The reveal toggle lives in Input now, so every password field gets the same one. */}
+      <Input label="Password" id="password" type="password" autoComplete="current-password" error={errors.password?.message} {...register('password', { required: 'Enter your password.' })} />
       <Button className="w-full" type="submit" disabled={isSubmitting}>{isSubmitting ? 'Signing in...' : 'Sign in'}</Button>
     </form>
     <p className="mt-8 text-center text-sm text-slate-600">Don't have an account? <Link className="font-semibold text-red-700 hover:text-red-800" to="/register">Sign up</Link></p>

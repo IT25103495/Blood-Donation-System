@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Plus } from 'lucide-react'
+import { Pencil, Plus, Trash2 } from 'lucide-react'
 import { authApi, getErrorMessage } from '../../api'
 import { Button } from '../../components/Button'
-import { DataTable, rowActionClass, type TableColumn } from '../../components/DataTable'
+import { ActionMenu } from '../../components/ActionMenu'
+import { DataTable, type TableColumn } from '../../components/DataTable'
 import { ErrorState } from '../../components/ErrorState'
 import { Input } from '../../components/Input'
 import { Modal } from '../../components/Modal'
@@ -116,9 +117,11 @@ export function UsersPage() {
       getRowKey={(row) => `${row.type}-${row.id}`}
       searchPlaceholder={`Search ${TABS.find((item) => item.type === tab)?.label.toLowerCase()}`}
       emptyMessage="No accounts of this kind yet."
-      actions={(row) => <div className="flex justify-end gap-3">
-        <button type="button" disabled={!canManage} onClick={() => setEditing(row)} className={`${rowActionClass} text-slate-600 hover:text-slate-900`}>Edit</button>
-        <button type="button" disabled={!canManage || row.undeletable} title={row.undeletable ? 'Sysadmin accounts cannot be deleted' : undefined} onClick={() => remove(row)} className={`${rowActionClass} text-red-700 hover:text-red-800`}>Delete</button>
+      actions={(row) => <div className="flex justify-end">
+        <ActionMenu label={`Actions for ${row.label}`} actions={[
+          { label: 'Edit account', icon: Pencil, disabled: !canManage, onClick: () => setEditing(row) },
+          { label: 'Delete', icon: Trash2, tone: 'danger', separated: true, disabled: !canManage || row.undeletable, title: row.undeletable ? 'Sysadmin accounts cannot be deleted' : undefined, onClick: () => remove(row) },
+        ]} />
       </div>}
     />
 

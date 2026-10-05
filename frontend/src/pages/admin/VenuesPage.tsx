@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
-import { ArrowLeft, Plus } from 'lucide-react'
+import { ArrowLeft, Pencil, Plus, Trash2 } from 'lucide-react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { bloodBanksApi, getErrorMessage, venuesApi } from '../../api'
 import { Button } from '../../components/Button'
+import { ActionMenu } from '../../components/ActionMenu'
 import { Card } from '../../components/Card'
-import { DataTable, rowActionClass, type TableColumn } from '../../components/DataTable'
+import { DataTable,  type TableColumn } from '../../components/DataTable'
 import { ErrorState } from '../../components/ErrorState'
 import { Input } from '../../components/Input'
 import { Modal } from '../../components/Modal'
@@ -18,9 +19,6 @@ function bankName(venue: Venue, banks: Bank[]) {
   return banks.find((bank) => bank.bankID === venue.assignedBank)?.name ?? `Bank ${venue.assignedBank}`
 }
 
-function RowAction({ label, onClick, tone = 'neutral' }: { label: string; onClick: () => void; tone?: 'neutral' | 'danger' }) {
-  return <button type="button" onClick={onClick} className={`${rowActionClass} ${tone === 'danger' ? 'text-red-700 hover:text-red-800' : 'text-slate-600 hover:text-slate-900'}`}>{label}</button>
-}
 
 function LoadingPage() {
   return <div className="space-y-5"><Skeleton className="h-12 w-64" /><Skeleton className="h-64" /></div>
@@ -79,9 +77,11 @@ export function VenuesAdminPage() {
       getRowKey={(row) => row.venueID}
       searchPlaceholder="Search venues"
       emptyMessage="No venues yet. Create one to get started."
-      actions={(row) => <div className="flex justify-end gap-3">
-        <RowAction label="Edit" onClick={() => navigate(`/admin/venues/${row.venueID}`)} />
-        <RowAction label="Delete" tone="danger" onClick={() => remove(row)} />
+      actions={(row) => <div className="flex justify-end">
+        <ActionMenu label={`Actions for ${row.name}`} actions={[
+          { label: 'Edit venue', icon: Pencil, onClick: () => navigate(`/admin/venues/${row.venueID}`) },
+          { label: 'Delete', icon: Trash2, tone: 'danger', separated: true, onClick: () => remove(row) },
+        ]} />
       </div>}
     />
 
