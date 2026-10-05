@@ -3,3 +3,7 @@
 /Plan.txt
 backend/backend/data/db.mv.db
 backend/backend/data/db.trace.db
+.claude/launch.json
+backend/backend_run.log
+user_accs.MD
+backend/backend_run_err.log
