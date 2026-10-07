@@ -5,7 +5,7 @@ import { authApi, bloodBanksApi, campaignsApi, getErrorMessage, venuesApi } from
 import { Button } from '../../components/Button'
 import { ActionMenu } from '../../components/ActionMenu'
 import { Card } from '../../components/Card'
-import { DataTable, rowActionClass, type TableColumn } from '../../components/DataTable'
+import { rowActionClass } from '../../components/DataTable'
 import { ErrorState } from '../../components/ErrorState'
 import { Input } from '../../components/Input'
 import { Modal } from '../../components/Modal'
@@ -85,13 +85,7 @@ export function CampaignsAdminPage() {
     catch (err: unknown) { showToast(getErrorMessage(err), 'error') }
   }
 
-  // Dates render as plain text so the table's search box can match on them.
-  const columns: TableColumn<Campaign>[] = useMemo(() => [
-    { key: 'name', header: 'Campaign', render: (row) => row.name },
-    { key: 'host', header: 'Host', render: (row) => hostName(row, hosters) },
-    { key: 'dates', header: 'Dates', render: (row) => `${row.startDate} to ${row.endDate}` },
-    { key: 'status', header: 'Status', render: (row) => <StatusSelect campaign={row} onChange={(status) => changeStatus(row, status)} />, searchable: false },
-  ], [hosters])
+
 
   if (loading) return <LoadingPage />
   if (error) return <ErrorState message={error} retry={load} />
@@ -105,21 +99,64 @@ export function CampaignsAdminPage() {
       <Button type="button" onClick={() => setCreateOpen(true)} className="inline-flex shrink-0 items-center gap-2"><Plus size={16} />Create campaign</Button>
     </div>
 
-    <DataTable
-      rows={campaigns}
-      columns={columns}
-      getRowKey={(row) => row.campID}
-      searchPlaceholder="Search campaigns"
-      statusOptions={['PENDING', 'APPROVED', 'REJECTED']}
-      getStatus={(row) => row.status}
-      emptyMessage="No campaigns yet. Create one to get started."
-      actions={(row) => <div className="flex justify-end">
-        <ActionMenu label={`Actions for ${row.name}`} actions={[
-          { label: 'Edit campaign', icon: Pencil, onClick: () => navigate(`/admin/campaigns/${row.campID}`) },
-          { label: 'Delete', icon: Trash2, tone: 'danger', separated: true, onClick: () => remove(row) },
-        ]} />
-      </div>}
-    />
+    <div className="grid gap-6 lg:grid-cols-[1fr_22rem]">
+      <div className="space-y-6">
+        <Card>
+          <div className="flex items-center gap-3">
+            <input aria-label="Search campaigns" placeholder="Search campaigns by name" className="min-w-0 flex-1 rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-red-700 focus:outline-none focus:ring-2 focus:ring-red-100" />
+            <select aria-label="Filter by status" className="rounded-md border border-slate-300 px-3 py-2 text-sm">
+              <option value="ALL">All statuses</option>
+              {CAMPAIGN_STATUSES.map((status) => <option key={status} value={status}>{status}</option>)}
+            </select>
+          </div>
+        </Card>
+
+        <Card>
+          <h2 className="text-xl font-bold text-slate-950">All campaigns</h2>
+          {campaigns.length === 0 ? (
+            <p className="mt-5 py-10 text-center text-sm text-slate-500">No campaigns yet. Create one to get started.</p>
+          ) : (
+            <ul className="mt-5 space-y-3">
+              {campaigns.map((row) => (
+                <li key={row.campID} className="flex flex-col gap-3 rounded-lg bg-slate-50 p-4 sm:flex-row sm:items-center">
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate font-semibold text-slate-950">{row.name}</span>
+                    <span className="block truncate text-sm text-slate-500">{hostName(row, hosters)} · {row.startDate} to {row.endDate}</span>
+                  </span>
+                  <span className="shrink-0">
+                    <StatusSelect campaign={row} onChange={(status) => changeStatus(row, status)} />
+                  </span>
+                  <span className="flex shrink-0 items-center gap-3">
+                    <ActionMenu label={`Actions for ${row.name}`} actions={[
+                      { label: 'Edit campaign', icon: Pencil, onClick: () => navigate(`/admin/campaigns/${row.campID}`) },
+                      { label: 'Delete', icon: Trash2, tone: 'danger', separated: true, onClick: () => remove(row) },
+                    ]} />
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Card>
+      </div>
+
+      <div className="space-y-6">
+        <Card>
+          <h2 className="text-lg font-bold text-slate-950">Summary</h2>
+          <div className="mt-4 flex items-center justify-between border-b border-slate-100 pb-4">
+            <span className="text-sm text-slate-500">Total campaigns</span>
+            <span className="font-bold text-slate-950">{campaigns.length}</span>
+          </div>
+          <div className="mt-4 flex items-center justify-between border-b border-slate-100 pb-4">
+            <span className="text-sm text-slate-500">Approved</span>
+            <span className="font-bold text-green-700">{campaigns.filter((c) => c.status === 'APPROVED').length}</span>
+          </div>
+          <div className="mt-4 flex items-center justify-between pb-2">
+            <span className="text-sm text-slate-500">Pending</span>
+            <span className="font-bold text-amber-600">{campaigns.filter((c) => c.status === 'PENDING').length}</span>
+          </div>
+        </Card>
+      </div>
+    </div>
 
     <CreateCampaignDialog open={createOpen} hosters={hosters} onClose={() => setCreateOpen(false)} onCreated={() => { setCreateOpen(false); load() }} />
   </div>

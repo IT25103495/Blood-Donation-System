@@ -5,7 +5,7 @@ import { bloodBanksApi, getErrorMessage, venuesApi } from '../../api'
 import { Button } from '../../components/Button'
 import { ActionMenu } from '../../components/ActionMenu'
 import { Card } from '../../components/Card'
-import { DataTable,  type TableColumn } from '../../components/DataTable'
+
 import { ErrorState } from '../../components/ErrorState'
 import { Input } from '../../components/Input'
 import { Modal } from '../../components/Modal'
@@ -53,11 +53,7 @@ export function VenuesAdminPage() {
     catch (err: unknown) { showToast(getErrorMessage(err), 'error') }
   }
 
-  const columns: TableColumn<Venue>[] = [
-    { key: 'name', header: 'Venue', render: (row) => row.name },
-    { key: 'address', header: 'Address', render: (row) => row.address },
-    { key: 'bank', header: 'Bank', render: (row) => bankName(row, banks) },
-  ]
+
 
   if (loading) return <LoadingPage />
   if (error) return <ErrorState message={error} retry={load} />
@@ -71,19 +67,50 @@ export function VenuesAdminPage() {
       <Button type="button" onClick={() => setCreateOpen(true)} className="inline-flex shrink-0 items-center gap-2"><Plus size={16} />Create venue</Button>
     </div>
 
-    <DataTable
-      rows={venues}
-      columns={columns}
-      getRowKey={(row) => row.venueID}
-      searchPlaceholder="Search venues"
-      emptyMessage="No venues yet. Create one to get started."
-      actions={(row) => <div className="flex justify-end">
-        <ActionMenu label={`Actions for ${row.name}`} actions={[
-          { label: 'Edit venue', icon: Pencil, onClick: () => navigate(`/admin/venues/${row.venueID}`) },
-          { label: 'Delete', icon: Trash2, tone: 'danger', separated: true, onClick: () => remove(row) },
-        ]} />
-      </div>}
-    />
+    <div className="grid gap-6 lg:grid-cols-[1fr_22rem]">
+      <div className="space-y-6">
+        <Card>
+          <div className="flex items-center gap-3">
+            <input aria-label="Search venues" placeholder="Search venues by name or address" className="min-w-0 flex-1 rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-red-700 focus:outline-none focus:ring-2 focus:ring-red-100" />
+          </div>
+        </Card>
+
+        <Card>
+          <h2 className="text-xl font-bold text-slate-950">All venues</h2>
+          {venues.length === 0 ? (
+            <p className="mt-5 py-10 text-center text-sm text-slate-500">No venues yet. Create one to get started.</p>
+          ) : (
+            <ul className="mt-5 space-y-3">
+              {venues.map((row) => (
+                <li key={row.venueID} className="flex flex-col gap-3 rounded-lg bg-slate-50 p-4 sm:flex-row sm:items-center">
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate font-semibold text-slate-950">{row.name}</span>
+                    <span className="block truncate text-sm text-slate-500">{row.address}</span>
+                  </span>
+                  <span className="shrink-0 text-sm font-semibold text-slate-600">{bankName(row, banks)}</span>
+                  <span className="flex shrink-0 items-center gap-3">
+                    <ActionMenu label={`Actions for ${row.name}`} actions={[
+                      { label: 'Edit venue', icon: Pencil, onClick: () => navigate(`/admin/venues/${row.venueID}`) },
+                      { label: 'Delete', icon: Trash2, tone: 'danger', separated: true, onClick: () => remove(row) },
+                    ]} />
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Card>
+      </div>
+
+      <div className="space-y-6">
+        <Card>
+          <h2 className="text-lg font-bold text-slate-950">Summary</h2>
+          <div className="mt-4 flex items-center justify-between border-b border-slate-100 pb-4">
+            <span className="text-sm text-slate-500">Total venues</span>
+            <span className="font-bold text-slate-950">{venues.length}</span>
+          </div>
+        </Card>
+      </div>
+    </div>
 
     <CreateVenueDialog open={createOpen} banks={banks} onClose={() => setCreateOpen(false)} onCreated={() => { setCreateOpen(false); load() }} />
   </div>

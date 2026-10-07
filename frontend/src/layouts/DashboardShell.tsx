@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { ChevronDown, HeartPulse, LogOut, Menu, X, type LucideIcon } from 'lucide-react'
 import { Link, NavLink, Outlet } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { PageTransition } from '../components/PageTransition'
+
 
 export type NavItem = { to: string; label: string; icon: LucideIcon; end?: boolean }
 export type NavSection = { label: string; items: NavItem[]; collapsible?: boolean }
@@ -97,9 +97,7 @@ export function DashboardShell({ title, sections, accountName, accountSubtitle, 
 
         {open && <button type="button" aria-label="Close navigation overlay" onClick={() => setOpen(false)} className="fixed inset-0 z-40 bg-slate-900/50 backdrop-blur-sm md:hidden" />}
         <main className="min-w-0 flex-1 px-4 py-8 sm:px-6 lg:px-10">
-          <PageTransition>
-            <Outlet />
-          </PageTransition>
+          <Outlet />
         </main>
       </div>
     </div>

@@ -2,7 +2,7 @@ import { HeartPulse, LogIn, LogOut } from 'lucide-react'
 import { Link, NavLink, Outlet } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { dashboardFor } from '../routes/ProtectedRoute'
-import { PageTransition } from '../components/PageTransition'
+
 
 export function PublicLayout() {
   const { token, role, adminType, logout } = useAuth()
@@ -30,9 +30,7 @@ export function PublicLayout() {
       </div>
     </header>
     <main className="flex-1">
-      <PageTransition>
-        <Outlet />
-      </PageTransition>
+      <Outlet />
     </main>
     <footer className="border-t border-slate-200 bg-white pb-8 pt-16">
       <div className="mx-auto grid max-w-6xl gap-8 px-4 sm:px-6 md:grid-cols-4">
