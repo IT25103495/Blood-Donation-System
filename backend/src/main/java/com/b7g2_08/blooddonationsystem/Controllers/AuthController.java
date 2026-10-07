@@ -73,12 +73,10 @@ public class AuthController {
         return authService.register_hoster(user);
     }
 
-    // A sysadmin edits any admin; every other admin may only edit themselves, which the service
-    // enforces by ignoring the id they sent.
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping(path="/edit/admin")
-    public @ResponseBody String edit_admin(@RequestBody adminUpdateDTO user, @AuthenticationPrincipal AuthEntity me) {
-        return authService.edit_admin(user, me);
+    public @ResponseBody String edit_admin(@RequestBody adminUpdateDTO user) {
+        return authService.edit_admin(user);
     }
 
     @PreAuthorize("hasAnyRole('SYSADMIN', 'DONOR')")
@@ -96,8 +94,6 @@ public class AuthController {
     public @ResponseBody String edit_hoster(@RequestBody hosterUpdateDTO user) {return authService.edit_hoster(user);}
     //TODO: Then make delete endpoints (maybe copy my getMe method to delete the current user?)
 
-    // Managers need this to pick the admin who runs a blood bank; the other account lists, and every
-    // write, stay with the sysadmin.
     @PreAuthorize("hasAnyRole('SYSADMIN','MANAGER')")
     @GetMapping(path = "/get/adminList")
     public @ResponseBody Iterable<Admin> getAdmins() { return authService.getAdmins();}
@@ -114,7 +110,6 @@ public class AuthController {
     @GetMapping(path = "/get/hospitalList")
     public @ResponseBody Iterable<Hospital> getHospitals() { return authService.getHospitals();}
 
-    // /auth/** is permitAll, so without this an anonymous call reaches a null principal.
     @PreAuthorize("isAuthenticated()")
     @GetMapping(path = "/get/me")
     public @ResponseBody User getMe(@AuthenticationPrincipal AuthEntity me) {

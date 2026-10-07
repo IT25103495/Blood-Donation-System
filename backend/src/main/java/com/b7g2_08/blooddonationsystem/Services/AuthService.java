@@ -16,7 +16,6 @@ import com.b7g2_08.blooddonationsystem.DesignPattern.User.*;
 import com.b7g2_08.blooddonationsystem.Enums.bloodTypeList;
 import com.b7g2_08.blooddonationsystem.Enums.userType;
 import com.b7g2_08.blooddonationsystem.Models.AuthEntity;
-import com.b7g2_08.blooddonationsystem.Enums.adminType;
 import com.b7g2_08.blooddonationsystem.Models.Users.Admin;
 import com.b7g2_08.blooddonationsystem.Models.Users.Donor;
 import com.b7g2_08.blooddonationsystem.Models.Users.Hospital;
@@ -62,7 +61,6 @@ public class AuthService {
     public TokenResponse login(authLoginDTO request) {
         TokenResponse token = new TokenResponse();
 
-        //Verify user is in DB
         Optional<AuthEntity> opAuth = authRepo.findByUsername(request.getUsername());
         if (opAuth.isEmpty() ||
                 !encoder.matches(request.getPassword(), opAuth.get().getPassword())) {
@@ -192,17 +190,8 @@ public class AuthService {
     }
 
     @Transactional
-    public @ResponseBody String edit_admin(adminUpdateDTO _user, AuthEntity me) {
-        // A doctor or a manager can reach this to maintain their own account, so the id they sent is
-        // only trusted from a sysadmin - everyone else edits themselves whatever the body says.
-        Integer targetID = _user.getId();
-        if (me != null && me.getAdmin() != null && me.getAdmin().getType() != adminType.SYSADMIN) {
-            targetID = me.getAdmin().getID();
-        }
-        if (targetID == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "An account id is required.");
-        }
-        Admin user = adminRepo.findById(targetID).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User Not Found!"));
+    public @ResponseBody String edit_admin(adminUpdateDTO _user) {
+        Admin user = adminRepo.findById(_user.getId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User Not Found!"));
         AuthEntity auth = user.getAuthEntity();
 
         if (checkNullEmpty(_user.getPhoneNum())) {
@@ -259,8 +248,6 @@ public class AuthService {
             user.setNic(_user.getNic());
         if (checkNullEmpty(_user.getBloodType()))
             user.setBloodType(_user.getBloodType());
-        // Guarded like every other field here: leaving dob out of the request used to null it, and
-        // "!=" on LocalDate compares references, so an unchanged date still counted as a change.
         if (_user.getDob() != null && !_user.getDob().equals(user.getDob()))
             user.setDob(_user.getDob());
         if (checkNullEmpty(_user.getPhoneNum()))
