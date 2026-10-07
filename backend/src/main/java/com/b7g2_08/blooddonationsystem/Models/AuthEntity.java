@@ -89,8 +89,6 @@ public class AuthEntity implements UserDetails {
         this.userType = userType;
     }
 
-    // Admins also carry their type as a role (ROLE_SYSADMIN / ROLE_MANAGER / ROLE_DOCTOR) so that
-    // @PreAuthorize can tell them apart. Without it every admin endpoint is open to all three.
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         List<GrantedAuthority> authorities = new ArrayList<>();

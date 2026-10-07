@@ -115,18 +115,11 @@ public class AppointmentService {
 
         Appointment appointment = appointmentRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Appointment Not Found!"));
 
-        // An appointment can only hold one unit, so a completed appointment that was reopened and
-        // completed again must not create a second one - that insert breaks the unique appID
-        // constraint and the whole status change fails with a conflict.
-        boolean alreadyCollected = inventoryRepository.findByAppointment_AppID(appointment.getAppID()).isPresent();
-
-        // The unit is stamped with the appointment's own date, so completing a visit that has not
-        // happened yet would file blood as collected in the future - and dated 40 days past that.
         if (appointmentStatusUpdateDTO.getStatus() == appStatus.COMPLETE && appointment.getDate().isAfter(LocalDate.now())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This appointment is scheduled for " + appointment.getDate() + " and cannot be completed yet.");
         }
 
-        if (appointment.getStatus() == appStatus.BOOKED && appointmentStatusUpdateDTO.getStatus() == appStatus.COMPLETE && !alreadyCollected) {
+        if (appointment.getStatus() == appStatus.BOOKED && appointmentStatusUpdateDTO.getStatus() == appStatus.COMPLETE) {
             Inventory item = new Inventory();
             item.setStatus(itemStatus.AVAILABLE);
             item.setDateCollected(appointment.getDate());
@@ -143,9 +136,6 @@ public class AppointmentService {
         return returnStr;
     }
 
-    // A donor may call off their own booking and nothing else. Kept separate from the admin status
-    // endpoint so cancelling is the only outcome they can reach - marking a donation COMPLETE
-    // creates an inventory unit and has to stay with staff.
     @Transactional
     public @ResponseBody String cancelOwnAppointment(int id, AuthEntity me) {
         Appointment appointment = appointmentRepository.findById(id)
