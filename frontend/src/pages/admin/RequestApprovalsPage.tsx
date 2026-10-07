@@ -4,6 +4,7 @@ import { Button } from '../../components/Button'
 import { Card } from '../../components/Card'
 import { EmptyState } from '../../components/EmptyState'
 import { ErrorState } from '../../components/ErrorState'
+import { RequestDetailsModal } from '../../components/RequestDetailsModal'
 import { StatusBadge } from '../../components/StatusBadge'
 import { useToast } from '../../context/ToastContext'
 import type { BloodRequest } from '../../types/api'
@@ -15,6 +16,7 @@ export function RequestApprovalsPage() {
   const [stock, setStock] = useState<Record<string, number>>({})
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
+  const [viewing, setViewing] = useState<BloodRequest | null>(null)
   const { showToast } = useToast()
   const load = () => { setLoading(true); Promise.all([requestsApi.getAll(), inventoryApi.getAvailable()]).then(([requestItems, inventory]) => { setRequests(requestItems.filter((item) => item.status === 'PENDING')); const counts: Record<string, number> = {}; inventory.forEach((item) => { counts[item.bloodType] = (counts[item.bloodType] ?? 0) + 1 }); setStock(counts) }).catch((err: unknown) => setError(getErrorMessage(err))).finally(() => setLoading(false)) }
   useEffect(load, [])
@@ -23,6 +25,7 @@ export function RequestApprovalsPage() {
   if (error) return <ErrorState message={error} retry={load} />
   return <div className="space-y-6">
     <div><p className="eyebrow">Review queue</p><h1 className="app-title mt-2 text-4xl font-bold text-slate-950">Blood request approvals</h1><p className="mt-2 text-slate-600">Review blood requests waiting for a decision.</p></div>
-    <div className="space-y-4">{requests.length === 0 ? <EmptyState title="No requests need approval" description="Pending blood requests will appear here." /> : requests.map((request) => { const quantities = quantitiesToMap(request.quantities); return <Card key={request.reqID}><div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-start"><div><h2 className="font-bold text-slate-950">Request #{request.reqID}</h2><p className="mt-1 text-sm text-slate-500">{request.hospitalName} · deadline {request.deadline}</p></div><StatusBadge status={request.status} /></div><div className="mt-4 flex flex-wrap gap-2">{BLOOD_TYPES.filter((type) => quantities[type] > 0).map((type) => <span key={type} className={`rounded-full px-2.5 py-1 text-xs font-semibold ${quantities[type] > (stock[type] ?? 0) ? 'bg-red-100 text-red-800' : 'bg-green-50 text-green-700'}`}>{type}: {quantities[type]} requested / {stock[type] ?? 0} available</span>)}</div><div className="mt-5 flex gap-2"><Button type="button" onClick={() => requestStatus(request.reqID, 'APPROVED')}>Approve request</Button><Button type="button" className="bg-slate-600 hover:bg-slate-700" onClick={() => requestStatus(request.reqID, 'REJECTED')}>Reject request</Button></div></Card> })}</div>
+    <div className="space-y-4">{requests.length === 0 ? <EmptyState title="No requests need approval" description="Pending blood requests will appear here." /> : requests.map((request) => { const quantities = quantitiesToMap(request.quantities); return <Card key={request.reqID}><div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-start"><div><h2 className="font-bold text-slate-950">Request #{request.reqID}</h2><p className="mt-1 text-sm text-slate-500">{request.hospitalName} · deadline {request.deadline}</p></div><StatusBadge status={request.status} /></div><div className="mt-4 flex flex-wrap gap-2">{BLOOD_TYPES.filter((type) => quantities[type] > 0).map((type) => <span key={type} className={`rounded-full px-2.5 py-1 text-xs font-semibold ${quantities[type] > (stock[type] ?? 0) ? 'bg-red-100 text-red-800' : 'bg-green-50 text-green-700'}`}>{type}: {quantities[type]} requested / {stock[type] ?? 0} available</span>)}</div><div className="mt-5 flex flex-wrap gap-2"><Button type="button" className="bg-slate-600 hover:bg-slate-700" onClick={() => setViewing(request)}>View</Button><Button type="button" onClick={() => requestStatus(request.reqID, 'APPROVED')}>Approve request</Button><Button type="button" className="bg-slate-600 hover:bg-slate-700" onClick={() => requestStatus(request.reqID, 'REJECTED')}>Reject request</Button></div></Card> })}</div>
+    <RequestDetailsModal request={viewing} onClose={() => setViewing(null)} />
   </div>
 }
