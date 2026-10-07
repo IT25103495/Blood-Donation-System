@@ -87,7 +87,7 @@ export function BookAppointmentPage() {
     <p className="mt-3 text-slate-600">{message}</p>
     <div className="mt-6 flex gap-3">
       <Button type="button" onClick={() => navigate('/donor/appointments')}>View appointments</Button>
-      <Button type="button" className="bg-slate-600 hover:bg-slate-700" onClick={reset}>Book another</Button>
+      {/*<Button type="button" className="bg-slate-600 hover:bg-slate-700" onClick={reset}>Book another</Button>*/}
     </div>
   </Card>
 
