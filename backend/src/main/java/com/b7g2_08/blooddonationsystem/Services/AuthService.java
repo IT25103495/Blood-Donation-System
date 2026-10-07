@@ -192,8 +192,17 @@ public class AuthService {
     }
 
     @Transactional
-    public @ResponseBody String edit_admin(adminUpdateDTO _user) {
-        Admin user = adminRepo.findById(_user.getId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User Not Found!"));
+    public @ResponseBody String edit_admin(adminUpdateDTO _user, AuthEntity me) {
+        // A doctor or a manager can reach this to maintain their own account, so the id they sent is
+        // only trusted from a sysadmin - everyone else edits themselves whatever the body says.
+        Integer targetID = _user.getId();
+        if (me != null && me.getAdmin() != null && me.getAdmin().getType() != adminType.SYSADMIN) {
+            targetID = me.getAdmin().getID();
+        }
+        if (targetID == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "An account id is required.");
+        }
+        Admin user = adminRepo.findById(targetID).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User Not Found!"));
         AuthEntity auth = user.getAuthEntity();
 
         if (checkNullEmpty(_user.getPhoneNum())) {

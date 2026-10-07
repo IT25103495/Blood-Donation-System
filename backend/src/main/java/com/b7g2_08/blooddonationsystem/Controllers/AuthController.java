@@ -73,10 +73,12 @@ public class AuthController {
         return authService.register_hoster(user);
     }
 
-    @PreAuthorize("hasRole('SYSADMIN')")
+    // A sysadmin edits any admin; every other admin may only edit themselves, which the service
+    // enforces by ignoring the id they sent.
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping(path="/edit/admin")
-    public @ResponseBody String edit_admin(@RequestBody adminUpdateDTO user) {
-        return authService.edit_admin(user);
+    public @ResponseBody String edit_admin(@RequestBody adminUpdateDTO user, @AuthenticationPrincipal AuthEntity me) {
+        return authService.edit_admin(user, me);
     }
 
     @PreAuthorize("hasAnyRole('SYSADMIN', 'DONOR')")
@@ -112,6 +114,8 @@ public class AuthController {
     @GetMapping(path = "/get/hospitalList")
     public @ResponseBody Iterable<Hospital> getHospitals() { return authService.getHospitals();}
 
+    // /auth/** is permitAll, so without this an anonymous call reaches a null principal.
+    @PreAuthorize("isAuthenticated()")
     @GetMapping(path = "/get/me")
     public @ResponseBody User getMe(@AuthenticationPrincipal AuthEntity me) {
         switch(me.getUserType()) {
