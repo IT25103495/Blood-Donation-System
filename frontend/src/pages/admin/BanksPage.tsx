@@ -13,6 +13,7 @@ import { Select } from '../../components/Select'
 import { Skeleton } from '../../components/Skeleton'
 import { WizardNav } from '../../components/Stepper'
 import { useToast } from '../../context/ToastContext'
+import { useConfirm } from '../../context/ConfirmContext'
 import type { Admin, Bank } from '../../types/api'
 
 // A bank's manager comes back either as a full object or as a bare id, depending on what else is in
@@ -38,6 +39,7 @@ function LoadingPage() {
 export function BanksAdminPage() {
   const navigate = useNavigate()
   const { showToast } = useToast()
+  const confirm = useConfirm()
   const [banks, setBanks] = useState<Bank[]>([])
   const [admins, setAdmins] = useState<Admin[]>([])
   const [loading, setLoading] = useState(true)
@@ -55,7 +57,7 @@ export function BanksAdminPage() {
   useEffect(load, [])
 
   const remove = async (bank: Bank) => {
-    if (!window.confirm(`Delete "${bank.name}"? This cannot be undone.`)) return
+    if (!await confirm(`Delete "${bank.name}"? This cannot be undone.`)) return
     try { await bloodBanksApi.remove(bank.bankID); showToast('Blood bank deleted.'); load() }
     catch (err: unknown) { showToast(getErrorMessage(err), 'error') }
   }

@@ -9,6 +9,7 @@ import { Skeleton } from '../../components/Skeleton'
 import { RequestDetailsModal } from '../../components/RequestDetailsModal'
 import { StatusBadge } from '../../components/StatusBadge'
 import { useToast } from '../../context/ToastContext'
+import { useConfirm } from '../../context/ConfirmContext'
 import type { Appointment, BloodRequest, Venue } from '../../types/api'
 
 const today = () => new Date().toISOString().slice(0, 10)
@@ -23,11 +24,12 @@ export function StaffPage() {
   const [error, setError] = useState<string | null>(null)
   const [working, setWorking] = useState<number | null>(null)
   const { showToast } = useToast()
+  const confirm = useConfirm()
   const load = () => { setLoading(true); Promise.all([venuesApi.getAll(), appointmentsApi.getAll(), requestsApi.getAll()]).then(([venueItems, appointmentItems, requestItems]) => { setVenues(venueItems); setAppointments(appointmentItems); setRequests(requestItems) }).catch((err: unknown) => setError(getErrorMessage(err))).finally(() => setLoading(false)) }
   useEffect(load, [])
   const selectedVenue = venues.find((venue) => venue.venueID === Number(venueID))
   const grouped = useMemo(() => { const relevant = appointments.filter((appointment) => appointment.status === 'BOOKED' && (!venueID || appointment.venue.venueID === Number(venueID))); return relevant.sort((a, b) => a.date.localeCompare(b.date)).reduce<Record<string, Appointment[]>>((groups, appointment) => { groups[appointment.date] = [...(groups[appointment.date] ?? []), appointment]; return groups }, {}) }, [appointments, venueID])
-  const updateStatus = async (appointment: Appointment, status: 'COMPLETE' | 'CANCELLED') => { if (status === 'CANCELLED' && !window.confirm('Cancel this appointment?')) return; setWorking(appointment.appID); try { await appointmentsApi.setStatus(appointment.appID, status);
+  const updateStatus = async (appointment: Appointment, status: 'COMPLETE' | 'CANCELLED') => { if (status === 'CANCELLED' && !await confirm('Cancel this appointment?')) return; setWorking(appointment.appID); try { await appointmentsApi.setStatus(appointment.appID, status);
     if (status === 'COMPLETE') {
       // const venue = await venuesApi.getById(appointment.venue.venueID);
       // await inventoryApi.create({ bloodType: appointment.donor.bloodType, appointmentID: appointment.appID, bankID: venue.assignedBank });

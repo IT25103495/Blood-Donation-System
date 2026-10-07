@@ -12,6 +12,7 @@ import { Skeleton } from '../../components/Skeleton'
 import { Stepper, WizardNav } from '../../components/Stepper'
 import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../../context/ToastContext'
+import { useConfirm } from '../../context/ConfirmContext'
 import { BLOOD_TYPES } from '../../utils/constants'
 import type { Admin, AdminType, Donor, Hospital, Hoster, UserType } from '../../types/api'
 
@@ -49,6 +50,7 @@ const DETAIL_HEADER: Record<UserType, string> = { DONOR: 'Blood type', HOSTER: '
 export function UsersPage() {
   const { adminType, userId } = useAuth()
   const { showToast } = useToast()
+  const confirm = useConfirm()
   const [tab, setTab] = useState<UserType>('DONOR')
   const [rows, setRows] = useState<Record<UserType, Row[]>>({ DONOR: [], HOSTER: [], HOSPITAL: [], ADMIN: [] })
   const [loading, setLoading] = useState(true)
@@ -77,7 +79,7 @@ export function UsersPage() {
   const remove = async (row: Row) => {
     if (row.undeletable) return showToast('Sysadmin accounts cannot be deleted. Change the role first if the account has to go.', 'error')
     if (row.type === 'ADMIN' && row.id === userId) return showToast('You cannot delete the account you are signed in with.', 'error')
-    if (!window.confirm(`Delete the ${SINGULAR[row.type]} account "${row.label}"? This cannot be undone.`)) return
+    if (!await confirm(`Delete the ${SINGULAR[row.type]} account "${row.label}"? This cannot be undone.`)) return
     try { await authApi.deleteUser(row.type, row.id); showToast('Account deleted.'); load() }
     catch (err: unknown) { showToast(getErrorMessage(err), 'error') }
   }

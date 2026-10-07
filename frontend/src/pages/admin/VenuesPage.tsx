@@ -13,6 +13,7 @@ import { Select } from '../../components/Select'
 import { Skeleton } from '../../components/Skeleton'
 import { WizardNav } from '../../components/Stepper'
 import { useToast } from '../../context/ToastContext'
+import { useConfirm } from '../../context/ConfirmContext'
 import type { Bank, Venue } from '../../types/api'
 
 function bankName(venue: Venue, banks: Bank[]) {
@@ -31,6 +32,7 @@ function LoadingPage() {
 export function VenuesAdminPage() {
   const navigate = useNavigate()
   const { showToast } = useToast()
+  const confirm = useConfirm()
   const [venues, setVenues] = useState<Venue[]>([])
   const [banks, setBanks] = useState<Bank[]>([])
   const [loading, setLoading] = useState(true)
@@ -48,7 +50,7 @@ export function VenuesAdminPage() {
   useEffect(load, [])
 
   const remove = async (venue: Venue) => {
-    if (!window.confirm(`Delete "${venue.name}"? This cannot be undone.`)) return
+    if (!await confirm(`Delete "${venue.name}"? This cannot be undone.`)) return
     try { await venuesApi.remove(venue.venueID); showToast('Venue deleted.'); load() }
     catch (err: unknown) { showToast(getErrorMessage(err), 'error') }
   }

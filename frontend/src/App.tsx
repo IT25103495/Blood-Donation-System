@@ -2,6 +2,7 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { lazy, Suspense } from 'react'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { ToastProvider } from './context/ToastContext'
+import { ConfirmProvider } from './context/ConfirmContext'
 import { AppointmentsPage } from './pages/donor/AppointmentsPage'
 import { BookAppointmentPage } from './pages/donor/BookAppointmentPage'
 import { ComingSoonPage } from './pages/donor/ComingSoonPage'
@@ -116,4 +117,4 @@ function AppRoutes() {
   </Routes></BrowserRouter>
 }
 
-export default function App() { return <ToastProvider><AuthProvider><AppRoutes /></AuthProvider></ToastProvider> }
+export default function App() { return <ToastProvider><ConfirmProvider><AuthProvider><AppRoutes /></AuthProvider></ConfirmProvider></ToastProvider> }

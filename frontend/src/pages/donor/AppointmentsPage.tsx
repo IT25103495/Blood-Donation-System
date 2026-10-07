@@ -8,6 +8,7 @@ import { Skeleton } from '../../components/Skeleton'
 import { StatusBadge } from '../../components/StatusBadge'
 import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../../context/ToastContext'
+import { useConfirm } from '../../context/ConfirmContext'
 import type { Appointment } from '../../types/api'
 
 const today = () => new Date().toISOString().slice(0, 10)
@@ -18,6 +19,7 @@ const isUpcoming = (item: Appointment) => item.status === 'BOOKED' && item.date 
 export function AppointmentsPage() {
   const { userId } = useAuth()
   const { showToast } = useToast()
+  const confirm = useConfirm()
   const [items, setItems] = useState<Appointment[]>([])
   const [tab, setTab] = useState<'upcoming' | 'past'>('upcoming')
   const [loading, setLoading] = useState(true)
@@ -34,7 +36,7 @@ export function AppointmentsPage() {
   const filtered = items.filter((item) => (tab === 'upcoming' ? isUpcoming(item) : !isUpcoming(item)))
 
   const cancel = async (item: Appointment) => {
-    if (!window.confirm('Cancel this appointment?')) return
+    if (!await confirm('Cancel this appointment?')) return
     setCancelling(item.appID)
     // Donors have their own endpoint: the admin status route can also mark a donation complete,
     // which creates an inventory unit, so it is not open to them.

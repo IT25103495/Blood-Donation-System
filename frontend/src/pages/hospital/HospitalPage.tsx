@@ -13,6 +13,7 @@ import { StatusBadge } from '../../components/StatusBadge'
 import { WizardNav } from '../../components/Stepper'
 import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../../context/ToastContext'
+import { useConfirm } from '../../context/ConfirmContext'
 import type { BloodRequest } from '../../types/api'
 import { BLOOD_TYPES } from '../../utils/constants'
 import { emptyQuantityMap, mapToQuantities, quantitiesToMap, type QuantityMap } from '../../utils/bloodTypes'
@@ -31,6 +32,7 @@ function describeUnits(request: BloodRequest) {
 export function HospitalPage() {
   const { userId } = useAuth()
   const { showToast } = useToast()
+  const confirm = useConfirm()
   const [requests, setRequests] = useState<BloodRequest[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -49,7 +51,7 @@ export function HospitalPage() {
 
   // The backend only lets a hospital withdraw a request while it is still PENDING.
   const cancel = async (request: BloodRequest) => {
-    if (!window.confirm('Withdraw request #' + request.reqID + '? This cannot be undone.')) return
+    if (!await confirm('Withdraw request #' + request.reqID + '? This cannot be undone.')) return
     try { await requestsApi.cancelMine(request.reqID); showToast('Request withdrawn.'); load() }
     catch (err: unknown) { showToast(getErrorMessage(err), 'error') }
   }

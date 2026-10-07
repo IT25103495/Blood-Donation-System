@@ -12,6 +12,7 @@ import { Skeleton } from '../../components/Skeleton'
 import { StatusBadge } from '../../components/StatusBadge'
 import { WizardNav, Stepper } from '../../components/Stepper'
 import { useToast } from '../../context/ToastContext'
+import { useConfirm } from '../../context/ConfirmContext'
 import type { Appointment, AppointmentStatus, Venue, Donor, Campaign } from '../../types/api'
 
 const today = () => new Date().toISOString().slice(0, 10)
@@ -31,6 +32,7 @@ function StatCard({ icon: Icon, value, label, share, tone }: { icon: typeof Cale
 
 export function AppointmentsAdminPage() {
   const { showToast } = useToast()
+  const confirm = useConfirm()
   const [rows, setRows] = useState<Appointment[]>([])
   const [venues, setVenues] = useState<Venue[]>([])
   const [loading, setLoading] = useState(true)
@@ -58,7 +60,7 @@ export function AppointmentsAdminPage() {
   }
 
   const remove = async (row: Appointment) => {
-    if (!window.confirm(`Delete ${row.donor.firstName} ${row.donor.lastName}'s appointment? This cannot be undone.`)) return
+    if (!await confirm(`Delete ${row.donor.firstName} ${row.donor.lastName}'s appointment? This cannot be undone.`)) return
     try { await appointmentsApi.remove(row.appID); showToast('Appointment deleted.'); load() }
     catch (err: unknown) { showToast(getErrorMessage(err), 'error') }
   }

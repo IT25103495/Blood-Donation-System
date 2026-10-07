@@ -14,6 +14,7 @@ import { Skeleton } from '../../components/Skeleton'
 import { StatusBadge } from '../../components/StatusBadge'
 import { Stepper, WizardNav } from '../../components/Stepper'
 import { useToast } from '../../context/ToastContext'
+import { useConfirm } from '../../context/ConfirmContext'
 import { hostName, venueIdsOf, venuesOf } from '../../utils/campaigns'
 import type { Bank, Campaign, CampaignStatus, Hoster, Venue } from '../../types/api'
 
@@ -55,6 +56,7 @@ function LoadingPage() {
 export function CampaignsAdminPage() {
   const navigate = useNavigate()
   const { showToast } = useToast()
+  const confirm = useConfirm()
   const [campaigns, setCampaigns] = useState<Campaign[]>([])
   const [hosters, setHosters] = useState<Hoster[]>([])
   const [loading, setLoading] = useState(true)
@@ -72,7 +74,7 @@ export function CampaignsAdminPage() {
   useEffect(load, [])
 
   const remove = async (campaign: Campaign) => {
-    if (!window.confirm(`Delete "${campaign.name}"? This cannot be undone.`)) return
+    if (!await confirm(`Delete "${campaign.name}"? This cannot be undone.`)) return
     try { await campaignsApi.remove(campaign.campID); showToast('Campaign deleted.'); load() }
     catch (err: unknown) { showToast(getErrorMessage(err), 'error') }
   }
@@ -376,6 +378,7 @@ type VenuesSectionProps = {
 }
 
 function CampaignVenuesSection({ campaign, venueIDs, campaignVenues, venues, banks, onChanged, showToast }: VenuesSectionProps) {
+  const confirm = useConfirm()
   const [adding, setAdding] = useState(false)
   const [editingID, setEditingID] = useState<number | null>(null)
 
@@ -385,7 +388,7 @@ function CampaignVenuesSection({ campaign, venueIDs, campaignVenues, venues, ban
 
   const remove = async (venue: Venue) => {
     if (isOnlyVenue) return showToast('A campaign must keep at least one venue. Add another one first.', 'error')
-    if (!window.confirm(`Remove "${venue.name}" from this campaign? The venue itself stays available for other campaigns.`)) return
+    if (!await confirm(`Remove "${venue.name}" from this campaign? The venue itself stays available for other campaigns.`)) return
     try {
       // The backend replaces the whole set, so send the venues that should remain.
       await campaignsApi.update(campaign.campID, { venueIDs: venueIDs.filter((venueID) => venueID !== venue.venueID) })
