@@ -8,13 +8,14 @@ import { Skeleton } from '../../components/Skeleton'
 import { StatusBadge } from '../../components/StatusBadge'
 import { useAuth } from '../../context/AuthContext'
 import { canBook } from '../../utils/eligibility'
+import { getUsername } from '../../utils/session'
 import type { Appointment } from '../../types/api'
 
 const today = () => new Date().toISOString().slice(0, 10)
 const daysUntil = (date: Date) => Math.max(0, Math.ceil((date.getTime() - Date.now()) / 86400000))
 
 export function DonorDashboardPage() { 
-  const { userId, user } = useAuth(); 
+  const { userId, token } = useAuth(); 
   const [appointments, setAppointments] = useState<Appointment[]>([]); 
   const [error, setError] = useState<string | null>(null); 
   const [loading, setLoading] = useState(true); 
@@ -61,7 +62,7 @@ export function DonorDashboardPage() {
         <div className="relative z-10 flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
           <div>
             <p className="font-semibold text-red-200 tracking-wider uppercase text-sm">Donor Dashboard</p>
-            <h1 className="mt-2 text-4xl sm:text-5xl font-extrabold text-white">Good to see you, {user?.name?.split(' ')[0] || 'Donor'}</h1>
+            <h1 className="mt-2 text-4xl sm:text-5xl font-extrabold text-white">Good to see you, {getUsername(token)?.split(' ')[0] || 'Donor'}</h1>
             <p className="mt-3 text-lg text-red-100 max-w-xl">Keep your donation journey moving forward. Every drop makes a difference.</p>
           </div>
           <Link to="/donor/book" className="inline-flex w-fit items-center gap-2 rounded-xl bg-white px-6 py-3.5 font-bold text-red-700 shadow-sm transition-all hover:bg-slate-50 hover:shadow hover:-translate-y-0.5">

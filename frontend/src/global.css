@@ -1,11 +1,15 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;500;600;700;800&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
+  html {
+    font-size: 14px;
+  }
+  
   :root { 
-    font-family: 'Inter', sans-serif; 
+    font-family: 'Nunito Sans', sans-serif; 
     color: #334155; 
     background: #f8fafc; 
     font-synthesis: none; 
@@ -21,6 +25,6 @@
 }
 
 @layer components {
-  .app-title { font-family: 'Outfit', sans-serif; }
+  .app-title { font-family: 'Nunito Sans', sans-serif; }
   .eyebrow { color: #b91c1c; font-size: .75rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
 }

@@ -1,4 +1,4 @@
-import { ArrowRight, HeartHandshake, ShieldCheck, Users, Activity, MapPin, Calendar, CheckCircle, Star } from 'lucide-react'
+import { ArrowRight, HeartHandshake, ShieldCheck, Users, Activity, MapPin, CheckCircle, Star } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'

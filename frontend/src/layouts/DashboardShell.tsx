@@ -40,7 +40,7 @@ export function DashboardShell({ title, sections, accountName, accountSubtitle, 
         </div>
       </header>
 
-      <div className="mx-auto flex max-w-[1600px]">
+      <div className="flex w-full">
         <aside className={`${open ? 'fixed inset-y-0 left-0 z-50 flex w-72 shadow-2xl' : 'hidden'} flex-col border-r border-slate-200 bg-white md:sticky md:top-0 md:flex md:h-screen md:w-64 md:shadow-none`}>
           <div className="flex items-center gap-3 px-6 py-6">
             <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-red-700 text-white shadow-sm"><HeartPulse size={20} /></span>
