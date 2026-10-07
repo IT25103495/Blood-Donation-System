@@ -1,4 +1,4 @@
-import { CalendarDays, HeartHandshake, UserRound } from 'lucide-react'
+import { CalendarDays, HeartHandshake } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { getUsername } from '../utils/session'
 import { DashboardShell, type NavSection } from './DashboardShell'
@@ -7,12 +7,10 @@ import { DashboardShell, type NavSection } from './DashboardShell'
 // rail as the admin rather than a different kind of chrome - only the links differ.
 const HOSPITAL_SECTIONS: NavSection[] = [
   { label: 'Main', items: [{ to: '/hospital', label: 'Blood requests', icon: HeartHandshake, end: true }] },
-  { label: 'Account', items: [{ to: '/hospital/profile', label: 'My profile', icon: UserRound }] },
 ]
 
 const DOCTOR_SECTIONS: NavSection[] = [
   { label: 'Main', items: [{ to: '/staff', label: 'Venue appointments', icon: CalendarDays, end: true }] },
-  { label: 'Account', items: [{ to: '/staff/profile', label: 'My profile', icon: UserRound }] },
 ]
 
 export function AppLayout() {

@@ -26,10 +26,11 @@ public class AppointmentController {
     private AppointmentService appointmentService;
 
     //create appointment
+    @PreAuthorize("hasAnyRole('DONOR','SYSADMIN')")
     @PostMapping()
-    public @ResponseBody String addAppointment(@RequestBody appointmentCreateDTO appointmentCreateDTO) {
+    public @ResponseBody String addAppointment(@RequestBody appointmentCreateDTO appointmentCreateDTO, @AuthenticationPrincipal AuthEntity me) {
 
-        return appointmentService.addNewAppointment(appointmentCreateDTO);
+        return appointmentService.addNewAppointment(appointmentCreateDTO, me);
     }
 
     // view all appointments

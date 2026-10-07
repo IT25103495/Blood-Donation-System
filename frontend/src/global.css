@@ -1,0 +1,30 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;500;600;700;800&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    font-size: 14px;
+  }
+  
+  :root { 
+    font-family: 'Nunito Sans', sans-serif; 
+    color: #334155; 
+    background: #f8fafc; 
+    font-synthesis: none; 
+    text-rendering: optimizeLegibility; 
+    -webkit-font-smoothing: antialiased; 
+  }
+  body { margin: 0; min-width: 320px; }
+  button, input, select, textarea { font: inherit; }
+  button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { 
+    outline: 3px solid rgba(185, 28, 28, .3); 
+    outline-offset: 2px; 
+  }
+}
+
+@layer components {
+  .app-title { font-family: 'Nunito Sans', sans-serif; }
+  .eyebrow { color: #b91c1c; font-size: .75rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+}

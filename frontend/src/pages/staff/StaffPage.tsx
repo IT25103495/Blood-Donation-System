@@ -1,6 +1,6 @@
 import { CalendarDays, MapPin } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
-import { appointmentsApi, getErrorMessage, inventoryApi, venuesApi } from '../../api'
+import { appointmentsApi, getErrorMessage, venuesApi } from '../../api'
 import { Button } from '../../components/Button'
 import { Card } from '../../components/Card'
 import { EmptyState } from '../../components/EmptyState'

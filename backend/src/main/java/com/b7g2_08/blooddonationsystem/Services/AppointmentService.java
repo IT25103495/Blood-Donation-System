@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,13 +44,23 @@ public class AppointmentService {
     private InventoryRepository inventoryRepository;
 
     @Transactional
-    public @ResponseBody String addNewAppointment(appointmentCreateDTO appointmentCreateDTO) {
+    public @ResponseBody String addNewAppointment(appointmentCreateDTO appointmentCreateDTO, AuthEntity me) {
 
         Appointment appointment = new Appointment();
 
         Campaign campaign = campaignRepository.findById(appointmentCreateDTO.getCampId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Campaign Not Found!"));
         Venue venue = venueRepository.findById(appointmentCreateDTO.getVenueID()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Venue Not Found!"));
-        Donor donor = donorUserRepository.findById(appointmentCreateDTO.getDonorID()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Donor Not Found!"));
+
+        // A donor books for themselves; the id in the body is only honoured for a sysadmin booking
+        // on someone's behalf. Otherwise any signed-in donor could book under another donor's name.
+        Integer donorID = appointmentCreateDTO.getDonorID();
+        if (me != null && me.getDonor() != null) {
+            donorID = me.getDonor().getID();
+        }
+        if (donorID == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A donor is required.");
+        }
+        Donor donor = donorUserRepository.findById(donorID).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Donor Not Found!"));
 
         appointment.setDate(appointmentCreateDTO.getDate());
         appointment.setStatus(appStatus.BOOKED);
@@ -108,6 +119,12 @@ public class AppointmentService {
         // completed again must not create a second one - that insert breaks the unique appID
         // constraint and the whole status change fails with a conflict.
         boolean alreadyCollected = inventoryRepository.findByAppointment_AppID(appointment.getAppID()).isPresent();
+
+        // The unit is stamped with the appointment's own date, so completing a visit that has not
+        // happened yet would file blood as collected in the future - and dated 40 days past that.
+        if (appointmentStatusUpdateDTO.getStatus() == appStatus.COMPLETE && appointment.getDate().isAfter(LocalDate.now())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This appointment is scheduled for " + appointment.getDate() + " and cannot be completed yet.");
+        }
 
         if (appointment.getStatus() == appStatus.BOOKED && appointmentStatusUpdateDTO.getStatus() == appStatus.COMPLETE && !alreadyCollected) {
             Inventory item = new Inventory();

@@ -1,4 +1,4 @@
-import { BarChart3, Building2, CalendarDays, ClipboardCheck, ClipboardList, Droplets, FileText, HeartHandshake, Store, UserRound, Users, type LucideIcon } from 'lucide-react'
+import { BarChart3, Building2, CalendarDays, ClipboardCheck, ClipboardList, Droplets, FileText, HeartHandshake, Store, Users, type LucideIcon } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { getUsername } from '../utils/session'
 import { DashboardShell } from './DashboardShell'
@@ -35,7 +35,6 @@ const SECTIONS: AdminNavSection[] = [
     label: 'Account',
     items: [
       { to: '/admin/users', label: 'Users', icon: Users },
-      { to: '/admin/profile', label: 'My profile', icon: UserRound, manager: true },
     ],
   },
 ]

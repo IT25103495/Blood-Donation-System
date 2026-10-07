@@ -25,7 +25,7 @@ import { LoginPage } from './pages/LoginPage'
 import { RegisterPage } from './pages/RegisterPage'
 import { ForbiddenPage, NotFoundPage } from './pages/StatusPages'
 import { ProtectedRoute, PublicOnlyRoute, dashboardFor, profileFor } from './routes/ProtectedRoute'
-import './App.css'
+
 
 const AppLayout = lazy(() => import('./layouts/AppLayout').then((module) => ({ default: module.AppLayout })))
 const AdminLayout = lazy(() => import('./layouts/AdminLayout').then((module) => ({ default: module.AdminLayout })))

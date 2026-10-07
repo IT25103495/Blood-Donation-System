@@ -34,11 +34,13 @@ public class VenueController {
         return venueService.updateVenue(venue);
     }
 
+    @PreAuthorize("hasAnyRole('SYSADMIN','DOCTOR','DONOR','HOSTER')")
     @GetMapping(path="/getAll")
     public @ResponseBody Iterable<Venue> getVenues() {
         return venueRepo.findAll();
     }
 
+    @PreAuthorize("hasAnyRole('SYSADMIN','DOCTOR','DONOR','HOSTER')")
     @GetMapping(path="/getById")
     public @ResponseBody ResponseEntity<Venue> getVenueByID(@RequestParam int ID) {
         return venueRepo.findById(ID)

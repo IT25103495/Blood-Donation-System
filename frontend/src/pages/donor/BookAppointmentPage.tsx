@@ -61,7 +61,6 @@ export function BookAppointmentPage() {
 
   // Choosing a different campaign invalidates the venue and date picked under the old one.
   const chooseCampaign = (selected: Campaign) => { if (selected.campID === campaign?.campID) return; setCampaign(selected); setVenue(null); setDate('') }
-  const reset = () => { setMessage(null); setStep(0); setCampaign(null); setVenue(null); setDate('') }
 
   const submit = async () => {
     if (!campaign || !venue || !date || userId === null) return

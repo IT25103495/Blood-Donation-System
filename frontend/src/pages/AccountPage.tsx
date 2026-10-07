@@ -12,12 +12,23 @@ import { useToast } from '../context/ToastContext'
 import { dashboardFor } from '../routes/ProtectedRoute'
 import { BLOOD_TYPES } from '../utils/constants'
 import { ageOn } from '../utils/eligibility'
-import type { Me } from '../types/api'
+import type { Me, UserUpdate } from '../types/api'
 
 const ROLE_LABEL: Record<string, string> = { DONOR: 'Donor', HOSTER: 'Campaign host', HOSPITAL: 'Hospital', ADMIN: 'Administrator' }
 const DASHBOARD_LABEL: Record<string, string> = { DONOR: 'My account', HOSTER: 'My campaigns', HOSPITAL: 'Hospital', ADMIN: 'Administration' }
-// An admin's record can only be changed by a sysadmin, so their profile stays read-only here.
-const EDITABLE_ROLES = ['DONOR', 'HOSTER', 'HOSPITAL']
+// Every role maintains its own contact details and password. A sysadmin can still edit any admin
+// from the users page; here the backend pins the record to whoever is signed in.
+const EDITABLE_ROLES = ['DONOR', 'HOSTER', 'HOSPITAL', 'ADMIN']
+// Same rule the register page enforces, so a password set here is one that could be registered.
+const passwordRule = (value: string) => value.length >= 8 && /[A-Z]/.test(value) && /[a-z]/.test(value) && /\d/.test(value)
+
+// Each role has its own edit endpoint; all four take the shared account fields.
+const saveFor = (role: string) => (body: UserUpdate) => {
+  if (role === 'DONOR') return authApi.editDonor(body)
+  if (role === 'HOSTER') return authApi.editHoster(body)
+  if (role === 'HOSPITAL') return authApi.editHospital(body)
+  return authApi.editAdmin(body)
+}
 
 function initialsOf(name: string) {
   return name.split(/\s+/).filter(Boolean).slice(0, 2).map((word) => word[0]).join('').toUpperCase() || '?'
@@ -81,7 +92,10 @@ export function AccountPage() {
       </Card>
 
       {canEdit
-        ? <ProfileForm me={me} role={role as string} onSaved={load} showToast={showToast} />
+        ? <div className="space-y-6">
+            <ProfileForm me={me} role={role as string} onSaved={load} showToast={showToast} />
+            <PasswordForm me={me} role={role as string} showToast={showToast} />
+          </div>
         : <Card>
             <h2 className="text-xl font-bold text-slate-950">Personal information</h2>
             <dl className="mt-5 grid gap-5 sm:grid-cols-2">
@@ -127,7 +141,8 @@ function ProfileForm({ me, role, onSaved, showToast }: { me: Me; role: string; o
     try {
       if (role === 'DONOR') await authApi.editDonor({ ...common, f_Name: form.f_Name.trim(), l_Name: form.l_Name.trim(), nic: form.nic.trim(), bloodType: form.bloodType, dob: form.dob })
       else if (role === 'HOSTER') await authApi.editHoster({ ...common, orgName: form.orgName.trim() })
-      else await authApi.editHospital({ ...common, hospitalName: form.hospitalName.trim(), address: form.address.trim() })
+      else if (role === 'HOSPITAL') await authApi.editHospital({ ...common, hospitalName: form.hospitalName.trim(), address: form.address.trim() })
+      else await authApi.editAdmin(common)
       showToast('Profile saved.')
       onSaved()
     } catch (err: unknown) { setFormError(getErrorMessage(err)) }
@@ -174,9 +189,44 @@ function ProfileForm({ me, role, onSaved, showToast }: { me: Me; role: string; o
         <Button type="button" className="bg-slate-600 hover:bg-slate-700" disabled={saving || !dirty} onClick={reset}>Cancel</Button>
         <Button type="submit" disabled={saving || !dirty}>{saving ? 'Saving...' : 'Save changes'}</Button>
       </div>
-      {/* Passwords are deliberately not here: changing one needs confirming it twice, which belongs
-          on its own page rather than mixed in with the details above. */}
-      <p className="text-sm text-slate-500">Changing your password is not available here yet.</p>
+    </form>
+  </Card>
+}
+
+// Its own card, below the details: a password needs confirming twice and saving on its own, so it
+// does not ride along with a change of phone number.
+function PasswordForm({ me, role, showToast }: { me: Me; role: string; showToast: (message: string, tone?: 'success' | 'error') => void }) {
+  const [password, setPassword] = useState('')
+  const [confirm, setConfirm] = useState('')
+  const [formError, setFormError] = useState<string | null>(null)
+  const [saving, setSaving] = useState(false)
+
+  const submit = async (event: React.FormEvent) => {
+    event.preventDefault()
+    setFormError(null)
+    if (!passwordRule(password)) return setFormError('Use at least 8 characters with uppercase, lowercase, and a number.')
+    if (password !== confirm) return setFormError('Passwords do not match.')
+    setSaving(true)
+    try {
+      await saveFor(role)({ id: me.id, password })
+      showToast('Password changed.')
+      setPassword('')
+      setConfirm('')
+    } catch (err: unknown) { setFormError(getErrorMessage(err)) }
+    finally { setSaving(false) }
+  }
+
+  return <Card>
+    <h2 className="text-xl font-bold text-slate-950">Password</h2>
+    <form onSubmit={submit} className="mt-5 space-y-5">
+      {formError && <div role="alert" className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-800">{formError}</div>}
+      <div className="grid gap-5 sm:grid-cols-2">
+        <Input label="New password" id="profile-password" type="password" autoComplete="new-password" value={password} onChange={(event) => setPassword(event.target.value)} hint="8+ characters with uppercase, lowercase, and a number." />
+        <Input label="Confirm new password" id="profile-password-confirm" type="password" autoComplete="new-password" value={confirm} onChange={(event) => setConfirm(event.target.value)} />
+      </div>
+      <div className="flex justify-end border-t border-slate-100 pt-5">
+        <Button type="submit" disabled={saving || !password || !confirm}>{saving ? 'Saving...' : 'Change password'}</Button>
+      </div>
     </form>
   </Card>
 }
