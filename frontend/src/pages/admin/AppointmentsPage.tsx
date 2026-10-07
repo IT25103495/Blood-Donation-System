@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { CalendarCheck2, CalendarClock, CalendarDays, CalendarX2, CheckCircle2, MapPin, Trash2, XCircle } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { appointmentsApi, getErrorMessage, venuesApi } from '../../api'
+import { appointmentsApi, getErrorMessage, venuesApi, authApi, campaignsApi } from '../../api'
 import { ActionMenu } from '../../components/ActionMenu'
 import { Card } from '../../components/Card'
 import { ErrorState } from '../../components/ErrorState'
@@ -10,9 +10,9 @@ import { Modal } from '../../components/Modal'
 import { Select } from '../../components/Select'
 import { Skeleton } from '../../components/Skeleton'
 import { StatusBadge } from '../../components/StatusBadge'
-import { WizardNav } from '../../components/Stepper'
+import { WizardNav, Stepper } from '../../components/Stepper'
 import { useToast } from '../../context/ToastContext'
-import type { Appointment, AppointmentStatus, Venue } from '../../types/api'
+import type { Appointment, AppointmentStatus, Venue, Donor, Campaign } from '../../types/api'
 
 const today = () => new Date().toISOString().slice(0, 10)
 const STATUSES: AppointmentStatus[] = ['BOOKED', 'CANCELLED', 'COMPLETE']
@@ -38,6 +38,7 @@ export function AppointmentsAdminPage() {
   const [search, setSearch] = useState('')
   const [venueFilter, setVenueFilter] = useState('')
   const [statusFilter, setStatusFilter] = useState('ALL')
+  const [creating, setCreating] = useState(false)
   const [editing, setEditing] = useState<Appointment | null>(null)
 
   const load = () => {
@@ -118,6 +119,9 @@ export function AppointmentsAdminPage() {
         <h1 className="app-title text-4xl font-bold text-slate-950">Appointments</h1>
         <p className="mt-2 text-slate-600">{stats.todays} appointment{stats.todays === 1 ? '' : 's'} today · {inUseCount} venue{inUseCount === 1 ? '' : 's'} in use</p>
       </div>
+      <button type="button" onClick={() => setCreating(true)} className="inline-flex items-center justify-center rounded-md bg-red-700 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-800">
+        Add Appointment
+      </button>
     </div>
 
     <Card className="!p-0">
@@ -202,6 +206,7 @@ export function AppointmentsAdminPage() {
     </div>
 
     <EditAppointmentDialog appointment={editing} venues={venues} onClose={() => setEditing(null)} onSaved={() => { setEditing(null); load() }} showToast={showToast} />
+    {creating && <CreateAppointmentDialog onClose={() => setCreating(false)} onSaved={() => { setCreating(false); load() }} showToast={showToast} />}
   </div>
 }
 
@@ -246,3 +251,129 @@ function EditAppointmentDialog({ appointment, venues, onClose, onSaved, showToas
   </Modal>
 }
 
+
+function CreateAppointmentDialog({ onClose, onSaved, showToast }: { onClose: () => void; onSaved: () => void; showToast: (message: string, tone?: 'success' | 'error') => void }) {
+  const [step, setStep] = useState(0)
+  const [date, setDate] = useState('')
+  const [venueID, setVenueID] = useState('')
+  const [donorID, setDonorID] = useState('')
+  const [campId, setCampId] = useState('')
+  const [formError, setFormError] = useState<string | null>(null)
+  const [saving, setSaving] = useState(false)
+  const [loadingLists, setLoadingLists] = useState(true)
+  
+  const [donors, setDonors] = useState<Donor[]>([])
+  const [campaigns, setCampaigns] = useState<Campaign[]>([])
+
+  useEffect(() => {
+    Promise.all([authApi.getDonors(), campaignsApi.getAll()])
+      .then(([d, c]) => { setDonors(d); setCampaigns(c) })
+      .catch((err) => setFormError(getErrorMessage(err)))
+      .finally(() => setLoadingLists(false))
+  }, [])
+
+  const selectedCampaign = campaigns.find(c => c.campID === Number(campId))
+  const validVenues = selectedCampaign?.venueSet || []
+
+  const nextStep = () => {
+    setFormError(null)
+    if (step === 0 && (!donorID || !campId)) {
+      return setFormError('Please select both a donor and a campaign.')
+    }
+    if (step === 1 && !venueID) {
+      return setFormError('Please select a venue.')
+    }
+    setStep((s) => s + 1)
+  }
+
+  const submit = async () => {
+    setFormError(null)
+    if (!date) return setFormError('Choose a date.')
+    if (selectedCampaign && (date < selectedCampaign.startDate || date > selectedCampaign.endDate)) {
+      return setFormError(`Date must be between ${selectedCampaign.startDate} and ${selectedCampaign.endDate}.`)
+    }
+    
+    setSaving(true)
+    try {
+      await appointmentsApi.create({ date, campId: Number(campId), donorID: Number(donorID), venueID: Number(venueID) })
+      showToast('Appointment created.', 'success')
+      onSaved()
+    } catch (err: unknown) { setFormError(getErrorMessage(err)) }
+    finally { setSaving(false) }
+  }
+
+  return <Modal open title="Create appointment" description="Set up the appointment and pick where it runs." onClose={onClose}>
+    {loadingLists ? <div className="space-y-4"><Skeleton className="h-10" /><Skeleton className="h-10" /><Skeleton className="h-10" /></div> : (
+      <div className="space-y-6">
+        <Stepper steps={['Details', 'Venue', 'Schedule']} current={step} onStepSelect={setStep} />
+        
+        <form onSubmit={(event) => { event.preventDefault(); if (step === 2) submit(); else nextStep(); }} className="space-y-4">
+          {formError && <div role="alert" className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-800">{formError}</div>}
+          
+          {step === 0 && (
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-sm font-semibold text-slate-900">Appointment details</h3>
+                <p className="text-sm text-slate-500 mb-4">Who the appointment is for and which campaign.</p>
+              </div>
+              <Select label="Donor" id="create-appointment-donor" value={donorID} onChange={(event) => setDonorID(event.target.value)}>
+                <option value="">Select a donor...</option>
+                {donors.map((d) => <option key={d.id} value={d.id}>{d.f_Name} {d.l_Name}</option>)}
+              </Select>
+              <Select label="Campaign" id="create-appointment-campaign" value={campId} onChange={(event) => setCampId(event.target.value)}>
+                <option value="">Select a campaign...</option>
+                {campaigns.map((c) => <option key={c.campID} value={c.campID}>{c.name}</option>)}
+              </Select>
+            </div>
+          )}
+
+          {step === 1 && (
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-sm font-semibold text-slate-900">Venue selection</h3>
+                <p className="text-sm text-slate-500 mb-4">Where the appointment will take place.</p>
+              </div>
+              {validVenues.length === 0 ? (
+                <p className="text-sm text-amber-700 bg-amber-50 p-3 rounded-md border border-amber-200">
+                  The selected campaign does not have any active venues. Please choose a different campaign.
+                </p>
+              ) : (
+                <Select label="Venue" id="create-appointment-venue" value={venueID} onChange={(event) => setVenueID(event.target.value)}>
+                  <option value="">Select a venue...</option>
+                  {validVenues.map((v) => <option key={v.venueID} value={v.venueID}>{v.name}</option>)}
+                </Select>
+              )}
+            </div>
+          )}
+
+          {step === 2 && (
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-sm font-semibold text-slate-900">Schedule</h3>
+                <p className="text-sm text-slate-500 mb-4">When the appointment is scheduled.</p>
+              </div>
+              <Input 
+                label="Date" 
+                id="create-appointment-date" 
+                type="date" 
+                min={selectedCampaign?.startDate}
+                max={selectedCampaign?.endDate}
+                value={date} 
+                onChange={(event) => setDate(event.target.value)} 
+              />
+              {selectedCampaign && (
+                <p className="text-xs text-slate-500">
+                  Must be between {selectedCampaign.startDate} and {selectedCampaign.endDate}
+                </p>
+              )}
+            </div>
+          )}
+
+          {step === 0 && <WizardNav onPrevious={onClose} previousLabel="Cancel" previousIcon={false} onNext={nextStep} nextLabel="Next" />}
+          {step === 1 && <WizardNav onPrevious={() => setStep(0)} onNext={nextStep} nextLabel="Next" />}
+          {step === 2 && <WizardNav onPrevious={() => setStep(1)} onNext={submit} nextLabel={saving ? 'Creating...' : 'Create appointment'} busy={saving} />}
+        </form>
+      </div>
+    )}
+  </Modal>
+}
