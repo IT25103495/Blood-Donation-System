@@ -1,4 +1,4 @@
-import { ArrowRight, HeartHandshake, ShieldCheck, Users, Activity, MapPin, CheckCircle, Star } from 'lucide-react'
+import { ArrowRight, Calendar, UserPlus, Droplets, CheckCircle2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { bookableCampaigns, campaignsApi, getErrorMessage } from '../api'
@@ -25,124 +25,47 @@ export function HomePage() {
   useEffect(load, [])
 
   return (
-    <div className="flex flex-col min-h-screen overflow-x-hidden">
+    <div className="flex flex-col min-h-screen">
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-white pt-16 md:pt-24 lg:pt-32 pb-16">
+      <section className="relative overflow-hidden bg-white pt-16 pb-20 lg:pt-24 lg:pb-28">
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5"></div>
-        <div className="absolute -top-24 -right-24 h-96 w-96 rounded-full bg-red-50 blur-3xl"></div>
-        <div className="absolute top-48 -left-24 h-72 w-72 rounded-full bg-red-100 blur-3xl"></div>
+        <div className="absolute top-0 right-0 h-96 w-96 -translate-y-1/2 translate-x-1/2 rounded-full bg-red-50 blur-3xl"></div>
         
-        <div className="relative mx-auto grid max-w-6xl gap-12 px-4 sm:px-6 lg:grid-cols-2 lg:items-center">
-          <div className="max-w-2xl">
-            <div className="inline-flex items-center gap-2 rounded-full bg-red-50 px-3 py-1 text-sm font-medium text-red-700 mb-6">
-              <span className="flex h-2 w-2 rounded-full bg-red-600 animate-pulse"></span>
-              Emergency shortage in your area
-            </div>
-            <h1 className="app-title max-w-xl text-5xl font-extrabold tracking-tight text-slate-950 sm:text-6xl md:text-7xl leading-[1.1]">
-              Give blood.<br/>
-              <span className="text-red-700">Save lives.</span>
+        <div className="relative mx-auto max-w-6xl px-4 sm:px-6">
+          <div className="text-center max-w-3xl mx-auto">
+            <h1 className="app-title text-5xl font-extrabold tracking-tight text-slate-950 sm:text-6xl mb-6">
+              Give Blood. <span className="text-red-700">Save Lives.</span>
             </h1>
-            <p className="mt-6 max-w-lg text-lg leading-8 text-slate-600">
-              Your donation can save up to three lives. Find an approved campaign near you and make time for a simple act that has a lasting impact.
+            <p className="text-lg leading-8 text-slate-600 mb-10">
+              Welcome to the Blood Donation Management System. Find upcoming blood donation campaigns near you and easily book your appointment online to help those in need.
             </p>
-            <div className="mt-8 flex flex-wrap items-center gap-4">
-              <Link to="/book" className="group inline-flex items-center gap-2 rounded-lg bg-red-700 px-6 py-3.5 font-semibold text-white shadow-md transition-all hover:bg-red-800 hover:shadow-lg hover:-translate-y-0.5">
-                Find a Drive
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <Link to="/book" className="group flex w-full sm:w-auto items-center justify-center gap-2 rounded-lg bg-red-700 px-8 py-3.5 font-semibold text-white transition-all hover:bg-red-800 hover:-translate-y-0.5 shadow-md hover:shadow-lg">
+                View Campaigns
                 <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" aria-hidden="true" />
               </Link>
-              <Link to="/eligibility" className="inline-flex items-center gap-2 rounded-lg border-2 border-slate-200 px-6 py-3.5 font-semibold text-slate-700 transition-all hover:border-slate-300 hover:bg-slate-50">
-                Check Eligibility
+              <Link to="/register" className="flex w-full sm:w-auto items-center justify-center gap-2 rounded-lg border-2 border-slate-200 px-8 py-3.5 font-semibold text-slate-700 transition-colors hover:border-slate-300 hover:bg-slate-50">
+                Register as Donor
               </Link>
             </div>
-            <div className="mt-10 flex items-center gap-4 text-sm text-slate-500 font-medium">
-              <div className="flex -space-x-2">
-                {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className={`h-8 w-8 rounded-full border-2 border-white bg-slate-200 flex items-center justify-center text-xs font-bold ${i === 1 ? 'bg-red-100 text-red-700' : 'text-slate-600'}`}>
-                    {i === 1 ? <Star size={12} className="fill-current"/> : String.fromCharCode(64 + i)}
-                  </div>
-                ))}
-              </div>
-              <p>Join 10,000+ donors this month</p>
-            </div>
-          </div>
-          
-          <div className="relative mx-auto w-full max-w-md lg:max-w-none">
-            <div className="absolute -inset-1 rounded-2xl bg-gradient-to-tr from-red-100 to-red-50 opacity-50 blur-lg"></div>
-            <div className="relative rounded-2xl border border-slate-100 bg-white p-8 shadow-xl">
-              <div className="flex items-center justify-between mb-8">
-                <HeartHandshake className="text-red-700" size={48} aria-hidden="true" />
-                <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700 flex items-center gap-1">
-                  <CheckCircle size={14} /> Verified System
-                </span>
-              </div>
-              <h2 className="app-title text-2xl font-bold text-slate-950 mb-2">Why Donate with Lifeline?</h2>
-              <p className="text-slate-600 mb-6 leading-relaxed">Safe, organized donation appointments with the information you need at every step of your journey.</p>
-              <ul className="space-y-5">
-                <li className="flex gap-4 p-3 rounded-lg hover:bg-slate-50 transition-colors">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-red-50 text-red-700">
-                    <ShieldCheck size={20} aria-hidden="true" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-slate-900">Trusted campaigns</h3>
-                    <p className="text-sm text-slate-500 mt-1">Only medically approved and verified campaigns appear in our system.</p>
-                  </div>
-                </li>
-                <li className="flex gap-4 p-3 rounded-lg hover:bg-slate-50 transition-colors">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-red-50 text-red-700">
-                    <Users size={20} aria-hidden="true" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-slate-900">Community powered</h3>
-                    <p className="text-sm text-slate-500 mt-1">Each appointment directly supports local hospitals and emergency care.</p>
-                  </div>
-                </li>
-              </ul>
-            </div>
           </div>
         </div>
       </section>
 
-      {/* Stats Section */}
-      <section className="bg-slate-950 py-12 text-white overflow-hidden">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <div className="grid grid-cols-2 gap-8 md:grid-cols-4 text-center divide-x divide-slate-800">
-            <div className="flex flex-col items-center">
-              <span className="text-4xl md:text-5xl font-extrabold text-white mb-2">15k+</span>
-              <span className="text-sm font-medium text-slate-400 uppercase tracking-wider">Active Donors</span>
-            </div>
-            <div className="flex flex-col items-center">
-              <span className="text-4xl md:text-5xl font-extrabold text-white mb-2">50+</span>
-              <span className="text-sm font-medium text-slate-400 uppercase tracking-wider">Partner Hospitals</span>
-            </div>
-            <div className="flex flex-col items-center">
-              <span className="text-4xl md:text-5xl font-extrabold text-red-500 mb-2">45k</span>
-              <span className="text-sm font-medium text-slate-400 uppercase tracking-wider">Lives Impacted</span>
-            </div>
-            <div className="flex flex-col items-center">
-              <span className="text-4xl md:text-5xl font-extrabold text-white mb-2">24/7</span>
-              <span className="text-sm font-medium text-slate-400 uppercase tracking-wider">Emergency Support</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Available Campaigns Section */}
-      <section className="bg-slate-50 py-20">
+      {/* Dynamic Campaigns Section */}
+      <section className="bg-slate-50 py-20 border-y border-slate-200">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10">
-            <div className="max-w-2xl">
-              <p className="eyebrow text-red-700">Upcoming opportunities</p>
-              <h2 className="app-title mt-2 text-3xl font-bold text-slate-950 sm:text-4xl">Available campaigns near you</h2>
-              <p className="mt-4 text-lg text-slate-600">Find a convenient location and time to make your donation.</p>
-            </div>
             <div>
-              <Link className="inline-flex items-center gap-2 text-sm font-semibold text-red-700 hover:text-red-800 transition-colors" to="/book">
-                View all options <ArrowRight size={16} />
-              </Link>
+              <h2 className="app-title text-3xl font-bold text-slate-950">Upcoming Campaigns</h2>
+              <p className="mt-2 text-slate-600">Browse and book an appointment at an active donation drive.</p>
             </div>
+            <Link className="inline-flex items-center gap-1.5 text-sm font-semibold text-red-700 hover:text-red-800 transition-colors" to="/book">
+              See all <ArrowRight size={16} />
+            </Link>
           </div>
           
-          <div className="mt-6">
+          <div>
             {loading ? (
               <div className="grid gap-6 md:grid-cols-2">
                 <Skeleton className="h-44 rounded-xl" />
@@ -151,7 +74,7 @@ export function HomePage() {
             ) : error ? (
               <ErrorState message={error} retry={load} />
             ) : campaigns.length === 0 ? (
-              <EmptyState title="No campaigns are open right now" description="Please check again soon for the next approved donation campaign." />
+              <EmptyState title="No campaigns available" description="There are currently no upcoming campaigns. Please check back later." />
             ) : (
               <CampaignList campaigns={campaigns} />
             )}
@@ -159,77 +82,77 @@ export function HomePage() {
         </div>
       </section>
 
-      {/* How it works Section */}
-      <section className="bg-white py-24 overflow-hidden">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 text-center">
-          <p className="eyebrow text-red-700">Simple Process</p>
-          <h2 className="app-title mt-3 text-3xl font-bold text-slate-950 sm:text-4xl">How donating works</h2>
-          <p className="mx-auto mt-4 max-w-2xl text-lg text-slate-600">Your donation journey is simple, safe, and fully supported by medical professionals.</p>
+      {/* How it Works (System Workflow) */}
+      <section className="bg-white py-24">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <div className="text-center mb-16">
+            <h2 className="app-title text-3xl font-bold text-slate-950">How the System Works</h2>
+            <p className="mt-3 text-slate-600 max-w-2xl mx-auto">
+              Our platform makes it simple to manage your blood donation journey from registration to your actual appointment.
+            </p>
+          </div>
+
+          <div className="grid gap-8 md:grid-cols-3 relative">
+            {/* Connecting line for desktop */}
+            <div className="hidden md:block absolute top-8 left-[15%] right-[15%] h-0.5 bg-slate-100 -z-10"></div>
+            
+            <div className="bg-white p-6 rounded-2xl text-center border border-slate-100 shadow-sm relative">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-red-50 text-red-700 mb-6 border border-red-100 shadow-sm">
+                <UserPlus size={28} />
+              </div>
+              <h3 className="text-xl font-bold text-slate-900 mb-2">1. Register Account</h3>
+              <p className="text-slate-600 text-sm">Create an account with your basic details and medical information to verify your eligibility.</p>
+            </div>
+
+            <div className="bg-white p-6 rounded-2xl text-center border border-slate-100 shadow-sm relative">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-red-50 text-red-700 mb-6 border border-red-100 shadow-sm">
+                <Calendar size={28} />
+              </div>
+              <h3 className="text-xl font-bold text-slate-900 mb-2">2. Book Appointment</h3>
+              <p className="text-slate-600 text-sm">Browse approved campaigns near you and select a convenient time slot and venue.</p>
+            </div>
+
+            <div className="bg-white p-6 rounded-2xl text-center border border-slate-100 shadow-sm relative">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-red-50 text-red-700 mb-6 border border-red-100 shadow-sm">
+                <Droplets size={28} />
+              </div>
+              <h3 className="text-xl font-bold text-slate-900 mb-2">3. Donate Blood</h3>
+              <p className="text-slate-600 text-sm">Visit the venue at your scheduled time. The system will track your donation history.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Basic Requirements */}
+      <section className="bg-slate-950 py-20 text-white">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:flex lg:items-center lg:justify-between gap-12">
+          <div className="lg:w-1/2 mb-10 lg:mb-0">
+            <h2 className="app-title text-3xl font-bold text-white mb-4">Basic Eligibility</h2>
+            <p className="text-slate-400 text-lg leading-relaxed">
+              Before booking an appointment, please ensure you meet the general requirements for blood donation. 
+              Our system will also verify these details during registration.
+            </p>
+            <div className="mt-8">
+              <Link to="/register" className="inline-flex items-center gap-2 rounded-lg bg-red-700 px-6 py-3 font-semibold text-white transition-colors hover:bg-red-600">
+                Register Now
+              </Link>
+            </div>
+          </div>
           
-          <div className="mt-16 grid gap-8 md:grid-cols-3">
-            {[
-              { num: '01', icon: Activity, title: 'Check Eligibility', text: 'Review the basic health, age, and timing guidance before choosing to donate.' },
-              { num: '02', icon: MapPin, title: 'Book an Appointment', text: 'Choose an approved campaign, select a venue, and pick a time slot that works for you.' },
-              { num: '03', icon: HeartHandshake, title: 'Give with Confidence', text: 'Arrive prepared. Our care team will guide you safely through the entire visit.' }
-            ].map((step, i) => (
-              <div key={i} className="group relative rounded-2xl border border-slate-100 bg-white p-8 text-left shadow-sm transition-all hover:shadow-xl hover:-translate-y-1">
-                <div className="absolute -top-6 left-8 flex h-12 w-12 items-center justify-center rounded-xl bg-red-700 text-white shadow-lg shadow-red-700/30">
-                  <step.icon size={24} />
-                </div>
-                <div className="mt-6">
-                  <span className="text-sm font-bold tracking-widest text-slate-300">STEP {step.num}</span>
-                  <h3 className="mt-2 text-xl font-bold text-slate-900">{step.title}</h3>
-                  <p className="mt-3 leading-relaxed text-slate-600">{step.text}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials Section */}
-      <section className="bg-slate-50 py-24 border-t border-slate-200">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 text-center">
-          <h2 className="app-title text-3xl font-bold text-slate-950 sm:text-4xl">Voices of our community</h2>
-          <div className="mt-16 grid gap-8 md:grid-cols-3 text-left">
-            {[
-              { name: 'Sarah M.', role: 'Regular Donor', quote: '"The process was incredibly smooth. The staff made me feel comfortable and I was out in less than an hour knowing I helped someone."' },
-              { name: 'James T.', role: 'First-time Donor', quote: '"I was nervous at first, but the app made it so easy to find a local drive and understand the eligibility requirements beforehand."' },
-              { name: 'Dr. Emily R.', role: 'Hospital Partner', quote: '"Lifeline has transformed how we manage our blood supply. The predictable flow of donors ensures we are always prepared for emergencies."' }
-            ].map((testimonial, i) => (
-              <div key={i} className="rounded-2xl bg-white p-8 shadow-sm border border-slate-100 relative">
-                <div className="flex text-yellow-400 mb-4">
-                  {[1, 2, 3, 4, 5].map((s) => <Star key={s} size={16} className="fill-current" />)}
-                </div>
-                <p className="text-slate-700 italic mb-6">"{testimonial.quote.replace(/"/g, '')}"</p>
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-full bg-slate-200 flex items-center justify-center font-bold text-slate-500">
-                    {testimonial.name.charAt(0)}
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-slate-900 text-sm">{testimonial.name}</h4>
-                    <p className="text-xs text-slate-500">{testimonial.role}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="relative overflow-hidden bg-red-700 py-20 text-center">
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/black-scales.png')] opacity-10"></div>
-        <div className="relative mx-auto max-w-3xl px-4 sm:px-6">
-          <h2 className="app-title text-3xl font-bold text-white sm:text-4xl">Ready to make a difference?</h2>
-          <p className="mt-4 text-lg text-red-100">Join thousands of donors who are already saving lives in your community.</p>
-          <div className="mt-10 flex flex-col sm:flex-row justify-center gap-4">
-            <Link to="/book" className="rounded-lg bg-white px-8 py-4 font-bold text-red-700 shadow-lg transition-all hover:bg-slate-50 hover:shadow-xl hover:-translate-y-1">
-              Book Your Appointment
-            </Link>
-            <Link to="/register" className="rounded-lg border-2 border-red-500 bg-transparent px-8 py-4 font-bold text-white transition-all hover:bg-red-800">
-              Create an Account
-            </Link>
+          <div className="lg:w-1/2">
+            <ul className="space-y-4">
+              {[
+                'Must be at least 17 years old',
+                'Weigh at least 110 lbs (50 kg)',
+                'Be in general good health and feeling well',
+                'Have not donated blood in the last 56 days'
+              ].map((req, i) => (
+                <li key={i} className="flex items-center gap-4 bg-slate-900 p-4 rounded-xl border border-slate-800">
+                  <CheckCircle2 className="text-green-500 shrink-0" size={24} />
+                  <span className="font-medium">{req}</span>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
       </section>
