@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
-import { ArrowLeft, MapPin, Plus } from 'lucide-react'
+import { ArrowLeft, MapPin, Pencil, Plus, Trash2 } from 'lucide-react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { authApi, bloodBanksApi, campaignsApi, getErrorMessage, venuesApi } from '../../api'
 import { Button } from '../../components/Button'
+import { ActionMenu } from '../../components/ActionMenu'
 import { Card } from '../../components/Card'
 import { DataTable, rowActionClass, type TableColumn } from '../../components/DataTable'
 import { ErrorState } from '../../components/ErrorState'
@@ -112,9 +113,11 @@ export function CampaignsAdminPage() {
       statusOptions={['PENDING', 'APPROVED', 'REJECTED']}
       getStatus={(row) => row.status}
       emptyMessage="No campaigns yet. Create one to get started."
-      actions={(row) => <div className="flex justify-end gap-3">
-        <RowAction label="Edit" onClick={() => navigate(`/admin/campaigns/${row.campID}`)} />
-        <RowAction label="Delete" tone="danger" onClick={() => remove(row)} />
+      actions={(row) => <div className="flex justify-end">
+        <ActionMenu label={`Actions for ${row.name}`} actions={[
+          { label: 'Edit campaign', icon: Pencil, onClick: () => navigate(`/admin/campaigns/${row.campID}`) },
+          { label: 'Delete', icon: Trash2, tone: 'danger', separated: true, onClick: () => remove(row) },
+        ]} />
       </div>}
     />
 

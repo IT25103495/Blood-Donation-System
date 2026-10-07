@@ -50,7 +50,9 @@ export function DataTable<T>({ rows, columns, getRowKey, searchPlaceholder = 'Se
       <table className="min-w-full text-left text-sm">
         <thead className="sticky top-0 z-10 bg-slate-50 text-xs uppercase tracking-wide text-slate-500"><tr>{columns.map((column) => <th key={column.key} className="whitespace-nowrap px-4 py-3 font-semibold">{column.header}</th>)}{actions && <th className="sticky right-0 bg-slate-50 px-4 py-3 text-right">Actions</th>}</tr></thead>
         <tbody className="divide-y divide-slate-100">
-          {pagination.items.map((row) => <tr key={getRowKey(row)} className="hover:bg-slate-50">{columns.map((column) => <td key={column.key} className="whitespace-nowrap px-4 py-3 text-slate-700">{column.render(row)}</td>)}{actions && <td className="sticky right-0 bg-white px-4 py-3 text-right">{actions(row)}</td>}</tr>)}
+          {/* The actions cell is sticky, so it needs its own background or the columns scroll under
+              it - inheriting the row's keeps it in step with the hover instead of staying white. */}
+          {pagination.items.map((row) => <tr key={getRowKey(row)} className="bg-white transition hover:bg-slate-50">{columns.map((column) => <td key={column.key} className="whitespace-nowrap px-4 py-3 text-slate-700">{column.render(row)}</td>)}{actions && <td className="sticky right-0 bg-inherit px-4 py-3 text-right">{actions(row)}</td>}</tr>)}
           {pagination.items.length === 0 && <tr><td colSpan={columns.length + (actions ? 1 : 0)} className="px-4 py-12 text-center text-slate-500">{emptyMessage}</td></tr>}
         </tbody>
       </table>

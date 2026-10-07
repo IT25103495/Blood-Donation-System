@@ -1,10 +1,57 @@
-import { BarChart3, Building2, CalendarDays, ClipboardCheck, ClipboardList, Droplets, FileText, HeartHandshake, HeartPulse, LogOut, Menu, Store, UserRound, Users, X } from 'lucide-react'
-import { useState } from 'react'
-import { Link, NavLink, Outlet } from 'react-router-dom'
+import { BarChart3, Building2, CalendarDays, ClipboardCheck, ClipboardList, Droplets, FileText, HeartHandshake, Store, UserRound, Users, type LucideIcon } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { getUsername } from '../utils/session'
+import { DashboardShell } from './DashboardShell'
+
+type AdminNavItem = { to: string; label: string; icon: LucideIcon; end?: boolean; manager?: boolean }
+type AdminNavSection = { label: string; items: AdminNavItem[]; collapsible?: boolean }
+
 // A manager looks after blood requests and the stock they draw on; campaigns, venues, appointments
 // and accounts belong to the sysadmin. The backend enforces the same split - this keeps the sidebar
 // from offering a manager pages they would only be turned away from.
-const links = [{ to: '/admin', label: 'Overview', icon: BarChart3, manager: true }, { to: '/admin/approvals/campaigns', label: 'Campaign approvals', icon: ClipboardCheck }, { to: '/admin/approvals/requests', label: 'Request approvals', icon: ClipboardList, manager: true }, { to: '/admin/campaigns', label: 'Campaigns', icon: FileText }, { to: '/admin/requests', label: 'Blood requests', icon: HeartHandshake, manager: true }, { to: '/admin/venues', label: 'Venues', icon: Store }, { to: '/admin/banks', label: 'Blood banks', icon: Building2, manager: true }, { to: '/admin/appointments', label: 'Appointments', icon: CalendarDays }, { to: '/admin/inventory', label: 'Inventory', icon: Droplets, manager: true }, { to: '/admin/users', label: 'Users', icon: Users }, { to: '/admin/profile', label: 'My profile', icon: UserRound, manager: true }]
-export function AdminLayout() { const { token, logout, adminType } = useAuth(); const [open, setOpen] = useState(false); const visibleLinks = adminType === 'MANAGER' ? links.filter((link) => link.manager) : links; return <div className="min-h-screen bg-slate-50"><header className="border-b border-slate-200 bg-white"><div className="mx-auto flex h-16 max-w-[1600px] items-center justify-between px-4 sm:px-6"><button type="button" className="mr-3 rounded p-2 md:hidden" onClick={() => setOpen(true)} aria-label="Open navigation"><Menu size={20} /></button><div className="flex items-center gap-3"><span className="flex h-9 w-9 items-center justify-center rounded-lg bg-red-700 text-white"><HeartPulse size={20} /></span><span className="app-title text-xl font-bold text-slate-950">Lifeline admin</span></div><div className="flex items-center gap-4 text-sm"><Link to="/admin/profile" className="hidden text-right sm:block"><strong className="block text-slate-900 hover:text-red-700">{getUsername(token) ?? 'Administrator'}</strong><span className="text-slate-500">{adminType}</span></Link><button type="button" onClick={logout} className="inline-flex items-center gap-2 rounded-md px-2 py-2 text-slate-600 hover:bg-slate-100" aria-label="Log out"><LogOut size={18} /><span className="hidden sm:inline">Log out</span></button></div></div></header><div className="mx-auto flex max-w-[1600px]"><aside className={`${open ? 'fixed inset-y-0 left-0 z-50 block w-72 shadow-xl' : 'hidden'} border-r border-slate-200 bg-white p-4 md:relative md:block md:w-64 md:shadow-none`}><div className="mb-4 flex justify-end md:hidden"><button type="button" onClick={() => setOpen(false)} aria-label="Close navigation"><X /></button></div><nav className="space-y-1" aria-label="Admin navigation">{visibleLinks.map(({ to, label, icon: Icon }) => <NavLink end={to === '/admin'} onClick={() => setOpen(false)} key={to} to={to} className={({ isActive }) => `flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium ${isActive ? 'bg-red-50 text-red-800' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-950'}`}><Icon size={18} />{label}</NavLink>)}</nav></aside>{open && <button type="button" aria-label="Close navigation overlay" onClick={() => setOpen(false)} className="fixed inset-0 z-40 bg-slate-950/30 md:hidden" />}<main className="min-w-0 flex-1 px-4 py-8 sm:px-6 lg:px-8"><Outlet /></main></div></div> }
+const SECTIONS: AdminNavSection[] = [
+  { label: 'Main', items: [{ to: '/admin', label: 'Overview', icon: BarChart3, end: true, manager: true }] },
+  {
+    label: 'Approvals',
+    collapsible: true,
+    items: [
+      { to: '/admin/approvals/campaigns', label: 'Campaign approvals', icon: ClipboardCheck },
+      { to: '/admin/approvals/requests', label: 'Request approvals', icon: ClipboardList, manager: true },
+    ],
+  },
+  {
+    label: 'Manage',
+    collapsible: true,
+    items: [
+      { to: '/admin/campaigns', label: 'Campaigns', icon: FileText },
+      { to: '/admin/requests', label: 'Blood requests', icon: HeartHandshake, manager: true },
+      { to: '/admin/venues', label: 'Venues', icon: Store },
+      { to: '/admin/banks', label: 'Blood banks', icon: Building2, manager: true },
+      { to: '/admin/appointments', label: 'Appointments', icon: CalendarDays },
+      { to: '/admin/inventory', label: 'Inventory', icon: Droplets, manager: true },
+    ],
+  },
+  {
+    label: 'Account',
+    items: [
+      { to: '/admin/users', label: 'Users', icon: Users },
+      { to: '/admin/profile', label: 'My profile', icon: UserRound, manager: true },
+    ],
+  },
+]
+
+export function AdminLayout() {
+  const { token, adminType } = useAuth()
+  const sections = SECTIONS.map((section) => ({
+    ...section,
+    items: adminType === 'MANAGER' ? section.items.filter((item) => item.manager) : section.items,
+  }))
+
+  return <DashboardShell
+    title="Lifeline admin"
+    sections={sections}
+    accountName={getUsername(token) ?? 'Administrator'}
+    accountSubtitle={adminType}
+    profileTo="/admin/profile"
+  />
+}
