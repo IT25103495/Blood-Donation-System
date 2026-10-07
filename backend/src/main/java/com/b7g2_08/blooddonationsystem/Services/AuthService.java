@@ -356,15 +356,6 @@ public class AuthService {
 
     @Transactional
     public @ResponseBody String deleteUser (userType type, int ID) {
-        // Sysadmins are the only accounts that can manage other admins, so deleting one can lock
-        // everybody out of administration. Demote the account first if it really has to go.
-        if (type == userType.ADMIN) {
-            Admin admin = adminRepo.findById(ID)
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User Not Found!"));
-            if (admin.getType() == adminType.SYSADMIN)
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Sysadmin accounts cannot be deleted.");
-        }
-
         UserContext context = setupContext(type);
         if (context != null)
             return context.delete(ID);
