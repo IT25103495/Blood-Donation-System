@@ -22,4 +22,51 @@ export function RequestsAdminPage() { const data = useAdminData(requestsApi.getA
 // This page must not create one as well: an appointment can only ever hold one unit (Inventory.appointment
 // is a @OneToOne), so the second insert hit the unique constraint and came back as a 409. The status
 // endpoint says whether it recorded a unit, so the toast just reports what it did.
-export function InventoryAdminPage() { const data = useAdminData(inventoryApi.getAll); const banks = useAdminData(bloodBanksApi.getAll); const { showToast } = useToast(); const [bloodType, setBloodType] = useState(''); const [appointmentID, setAppointmentID] = useState(''); const [bankID, setBankID] = useState(''); const columns: TableColumn<InventoryItem>[] = [{ key: 'type', header: 'Blood type', render: (row) => row.bloodType }, { key: 'collected', header: 'Collected', render: (row) => row.dateCollected }, { key: 'expiry', header: 'Expiry', render: (row) => <span className={row.expiry < new Date().toISOString().slice(0, 10) ? 'font-bold text-red-700' : ''}>{row.expiry}</span> }, { key: 'bank', header: 'Bank', render: (row) => banks.rows.find((bank) => bank.bankID === row.bank)?.name ?? row.bank.toString() }, { key: 'status', header: 'Status', render: (row) => <StatusBadge status={row.status} />, searchable: false }]; const submit = async (event: React.FormEvent) => { event.preventDefault(); if (!bloodType || !appointmentID || !bankID) { showToast('Fill in blood type, appointment, and bank.', 'error'); return } try { await inventoryApi.create({ bloodType, appointmentID: Number(appointmentID), bankID: Number(bankID) }); showToast('Inventory unit created.'); setBloodType(''); setAppointmentID(''); setBankID(''); data.load() } catch (err: unknown) { showToast(getErrorMessage(err), 'error') } }; return <Frame title="Inventory" description="Track individual blood units and their movement."><Card><h2 className="text-lg font-bold text-slate-950">Add inventory unit</h2><p className="mt-1 text-sm text-slate-500">Units are usually created automatically when an appointment is marked complete. Use this only to record a unit manually.</p><form onSubmit={submit} className="mt-4 grid gap-3 md:grid-cols-[1fr_1fr_1fr_auto]"><Select label="Blood type" id="inventory-bloodtype" value={bloodType} onChange={(event) => setBloodType(event.target.value)}><option value="">Select type</option>{BLOOD_TYPES.map((type) => <option key={type}>{type}</option>)}</Select><Input label="Appointment ID" id="inventory-appointment" type="number" min="1" value={appointmentID} onChange={(event) => setAppointmentID(event.target.value)} /><Select label="Bank" id="inventory-bank" value={bankID} onChange={(event) => setBankID(event.target.value)}><option value="">Select bank</option>{banks.rows.map((bank) => <option key={bank.bankID} value={bank.bankID}>{bank.name}</option>)}</Select><Button type="submit" className="self-end">Add unit</Button></form></Card><DataTable rows={data.rows} columns={columns} getRowKey={(row) => row.itemID} statusOptions={['AVAILABLE', 'EXPIRED', 'SHIPPED']} getStatus={(row) => row.status} actions={(row) => <div className="flex justify-end"><ActionMenu label={'Actions for unit #' + row.itemID} actions={[{ label: 'Mark expired', icon: CalendarX2, disabled: row.status !== 'AVAILABLE', onClick: async () => { try { await inventoryApi.setStatus(row.itemID, 'EXPIRED'); showToast('Unit marked expired.'); data.load() } catch (err: unknown) { showToast(getErrorMessage(err), 'error') } } }, { label: 'Mark shipped', icon: Truck, disabled: row.status !== 'AVAILABLE', onClick: async () => { try { await inventoryApi.setStatus(row.itemID, 'SHIPPED'); showToast('Unit marked shipped.'); data.load() } catch (err: unknown) { showToast(getErrorMessage(err), 'error') } } }, { label: 'Delete', icon: Trash2, tone: 'danger' as const, separated: true, onClick: async () => { if (!window.confirm('Delete this inventory unit?')) return; try { await inventoryApi.remove(row.itemID); showToast('Inventory unit deleted.'); data.load() } catch (err: unknown) { showToast(getErrorMessage(err), 'error') } } }]} /></div>} /></Frame> }
+export function InventoryAdminPage() {
+    const data = useAdminData(inventoryApi.getAll);
+    const banks = useAdminData(bloodBanksApi.getAll);
+    const { showToast } = useToast(); const [bloodType, setBloodType] = useState('');
+    const [appointmentID, setAppointmentID] = useState(''); const [bankID, setBankID] = useState('');
+    const columns: TableColumn<InventoryItem>[] = [
+        { key: 'type', header: 'Blood type', render: (row) => row.bloodType },
+        { key: 'collected', header: 'Collected', render: (row) => row.dateCollected },
+        { key: 'expiry', header: 'Expiry', render: (row) => <span className={row.expiry < new Date().toISOString().slice(0, 10)
+                ? 'font-bold text-red-700' : ''}>{row.expiry}</span> },
+        { key: 'bank', header: 'Bank', render: (row) => banks.rows.find((bank) => bank.bankID === row.bank)?.name ?? row.bank.toString() },
+        { key: 'status', header: 'Status', render: (row) => <StatusBadge status={row.status} />, searchable: false }];
+    const submit = async (event: React.FormEvent) => { event.preventDefault(); if (!bloodType || !appointmentID || !bankID)
+    {
+        showToast('Fill in blood type, appointment, and bank.', 'error');
+        return
+    }
+        try {
+            await inventoryApi.create({ bloodType, appointmentID: Number(appointmentID), bankID: Number(bankID) });
+            showToast('Inventory unit created.'); setBloodType('');
+            setAppointmentID('');
+            setBankID(''); data.load()
+        }
+        catch (err: unknown) {
+            showToast(getErrorMessage(err), 'error')
+        }
+    };
+    return <Frame title="Inventory" description="Track individual blood units and their movement.">
+        <Card>
+            <h2 className="text-lg font-bold text-slate-950">Add inventory unit</h2>
+            <p className="mt-1 text-sm text-slate-500">Units are usually created automatically when an appointment is marked complete. Use this only to record a unit manually.</p>
+            <form onSubmit={submit} className="mt-4 grid gap-3 md:grid-cols-[1fr_1fr_1fr_auto]">
+                <Select label="Blood type" id="inventory-bloodtype" value={bloodType} onChange={(event) => setBloodType(event.target.value)}>
+                    <option value="">Select type</option>{BLOOD_TYPES.map((type) => <option key={type}>{type}</option>)}
+                </Select>
+                <Input label="Appointment ID" id="inventory-appointment" type="number" min="1" value={appointmentID} onChange={(event) => setAppointmentID(event.target.value)} />
+                <Select label="Bank" id="inventory-bank" value={bankID} onChange={(event) => setBankID(event.target.value)}>
+                    <option value="">Select bank</option>
+                    {banks.rows.map((bank) => <option key={bank.bankID} value={bank.bankID}>{bank.name}</option>)}
+                </Select>
+                <Button type="submit" className="self-end">Add unit</Button>
+            </form>
+        </Card>
+        <DataTable rows={data.rows} columns={columns} getRowKey={(row) => row.itemID} statusOptions={['AVAILABLE', 'EXPIRED', 'SHIPPED']} getStatus={(row) => row.status} actions={(row) =>
+            <div className="flex justify-end">
+                <ActionMenu label={'Actions for unit #' + row.itemID} actions={[{ label: 'Mark expired', icon: CalendarX2, disabled: row.status !== 'AVAILABLE', onClick: async () => { try { await inventoryApi.setStatus(row.itemID, 'EXPIRED'); showToast('Unit marked expired.'); data.load() } catch (err: unknown) { showToast(getErrorMessage(err), 'error') } } }, { label: 'Mark shipped', icon: Truck, disabled: row.status !== 'AVAILABLE', onClick: async () => { try { await inventoryApi.setStatus(row.itemID, 'SHIPPED'); showToast('Unit marked shipped.'); data.load() } catch (err: unknown) { showToast(getErrorMessage(err), 'error') } } }, { label: 'Delete', icon: Trash2, tone: 'danger' as const, separated: true, onClick: async () => { if (!window.confirm('Delete this inventory unit?')) return; try { await inventoryApi.remove(row.itemID); showToast('Inventory unit deleted.'); data.load() } catch (err: unknown) { showToast(getErrorMessage(err), 'error') } } }]} />
+            </div>} />
+    </Frame> }

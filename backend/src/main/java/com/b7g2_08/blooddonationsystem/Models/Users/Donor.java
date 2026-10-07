@@ -1,6 +1,5 @@
 package com.b7g2_08.blooddonationsystem.Models.Users;
 
-import com.b7g2_08.blooddonationsystem.Enums.bloodTypeList;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -62,7 +61,7 @@ public class Donor extends User {
         return nic;
     }
 
-    public void setNic(String NIC) {
+    public void setNic(String nic) {
         this.nic = nic;
     }
 }
